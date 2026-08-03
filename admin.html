@@ -657,7 +657,7 @@ async function togglePollResults(game) {
 
   const { data: votes, error } = await supabaseClient
     .from('game_poll_votes')
-    .select('voter_id, deserved_win, player_name, oathbreaker_player_name, created_at')
+    .select('voter_id, deserved_win, player_name, oathbreaker_player_name, one_man_army_player_name, created_at')
     .eq('game_id', game.id)
     .order('created_at', { ascending: true });
 
@@ -679,12 +679,12 @@ async function togglePollResults(game) {
 
     tableHtml = `
       <table>
-        <thead><tr><th>Oy Veren</th><th>Kazanan Hak Etti mi?</th><th>MVP Oyu</th><th>Oathbreaker Oyu</th></tr></thead>
+        <thead><tr><th>Oy Veren</th><th>Kazanan Hak Etti mi?</th><th>MVP Oyu</th><th>Oathbreaker Oyu</th><th>Tek Kişilik Ordu Oyu</th></tr></thead>
         <tbody>
           ${votes.map(v => {
             const profile = profileMap[v.voter_id];
             const voterLabel = profile ? escapeHtml(profile.player_name || profile.username) : 'Bilinmiyor';
-            return `<tr><td>${voterLabel}</td><td>${v.deserved_win ? 'Evet' : 'Hayır'}</td><td>${escapeHtml(v.player_name || '—')}</td><td>${escapeHtml(v.oathbreaker_player_name || '—')}</td></tr>`;
+            return `<tr><td>${voterLabel}</td><td>${v.deserved_win ? 'Evet' : 'Hayır'}</td><td>${escapeHtml(v.player_name || '—')}</td><td>${escapeHtml(v.oathbreaker_player_name || 'Kimse')}</td><td>${escapeHtml(v.one_man_army_player_name || 'Kimse')}</td></tr>`;
           }).join('')}
         </tbody>
       </table>

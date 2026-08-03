@@ -382,10 +382,11 @@ async function loadPoll() {
   const myName = Civ6Auth.playerName;
   const mvpCandidates = ROSTER.filter(n => n !== myName && n !== winner.player_name);
   const oathbreakerCandidates = ROSTER.filter(n => n !== myName);
+  const oneManArmyCandidates = ROSTER.filter(n => n !== myName);
 
   const { data: existingVote } = await supabaseClient
     .from('game_poll_votes')
-    .select('deserved_win, player_name, oathbreaker_player_name')
+    .select('deserved_win, player_name, oathbreaker_player_name, one_man_army_player_name')
     .eq('game_id', g.id)
     .eq('voter_id', Civ6Auth.currentUser.id)
     .maybeSingle();
@@ -405,7 +406,14 @@ async function loadPoll() {
     <label for="poll-oathbreaker-select">Oathbreaker: Ettiği yeminleri, bağlandığı ilkeleri ve antlaşmaları sikine taşşağına sürdü.</label>
     <select id="poll-oathbreaker-select">
       <option value="">— Seç —</option>
+      <option value="__none__"${existingVote && existingVote.oathbreaker_player_name === null ? ' selected' : ''}>🚫 Kimse</option>
       ${oathbreakerCandidates.map(n => `<option value="${n}"${existingVote && existingVote.oathbreaker_player_name === n ? ' selected' : ''}>${n}</option>`).join('')}
+    </select>
+    <label for="poll-onemanarmy-select">Tek Kişilik Ordu: 3V1'e karşı elendi ancak pes etmedi.</label>
+    <select id="poll-onemanarmy-select">
+      <option value="">— Seç —</option>
+      <option value="__none__"${existingVote && existingVote.one_man_army_player_name === null ? ' selected' : ''}>🚫 Kimse</option>
+      ${oneManArmyCandidates.map(n => `<option value="${n}"${existingVote && existingVote.one_man_army_player_name === n ? ' selected' : ''}>${n}</option>`).join('')}
     </select>
     <button id="poll-submit-btn">${existingVote ? 'Oyunu Güncelle' : 'Oyla'}</button>
     <div id="poll-msg"></div>
@@ -419,6 +427,7 @@ async function loadPoll() {
     const deservedInput = document.querySelector('input[name="poll-deserved"]:checked');
     const mvpSelect = document.getElementById('poll-mvp-select');
     const oathbreakerSelect = document.getElementById('poll-oathbreaker-select');
+    const oneManArmySelect = document.getElementById('poll-onemanarmy-select');
 
     if (!deservedInput) {
       msgEl.textContent = 'Lütfen bir seçim yap.';
@@ -430,11 +439,9 @@ async function loadPoll() {
       msgEl.className = 'error';
       return;
     }
-    if (!oathbreakerSelect.value) {
-      msgEl.textContent = 'Lütfen bir Oathbreaker seç.';
-      msgEl.className = 'error';
-      return;
-    }
+
+    const oathbreakerValue = oathbreakerSelect.value === '__none__' ? null : (oathbreakerSelect.value || null);
+    const oneManArmyValue = oneManArmySelect.value === '__none__' ? null : (oneManArmySelect.value || null);
 
     const { error } = await supabaseClient
       .from('game_poll_votes')
@@ -443,7 +450,8 @@ async function loadPoll() {
         voter_id: Civ6Auth.currentUser.id,
         deserved_win: deservedInput.value === 'yes',
         player_name: mvpSelect.value,
-        oathbreaker_player_name: oathbreakerSelect.value,
+        oathbreaker_player_name: oathbreakerValue,
+        one_man_army_player_name: oneManArmyValue,
         updated_at: new Date().toISOString()
       }, { onConflict: 'game_id,voter_id' });
 
