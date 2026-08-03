@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oyuncu Profili — Civ 6 Şeref Listesi</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div class="header-left">
+    <div id="auth-widget" class="auth-widget"></div>
+    <h1>🏛️ Civ 6 Şeref Listesi</h1>
+  </div>
+  <nav>
+    <a href="index.html">Şeref Listesi</a>
+    <a href="oyun-tarihi.html">Oyun Tarihi</a>
+    <a href="rules.html">Kurallar</a>
+    <a href="playlist.html">Çalma Listesi</a>
+    <a href="admin.html">Yönetim</a>
+  </nav>
+</header>
+
+<div class="hero-banner">
+  <div class="hero-emblem">
+    <svg class="laurel laurel-left" viewBox="0 0 40 70" xmlns="http://www.w3.org/2000/svg">
+      <path d="M20 68 C 10 55, 8 40, 14 20 C 17 10, 20 4, 20 2" fill="none" stroke="var(--accent-dim)" stroke-width="1.3"/>
+      <g fill="var(--accent-dim)">
+        <ellipse cx="12" cy="58" rx="4" ry="9" transform="rotate(-35 12 58)"/>
+        <ellipse cx="9" cy="46" rx="4" ry="9" transform="rotate(-40 9 46)"/>
+        <ellipse cx="10" cy="34" rx="3.6" ry="8" transform="rotate(-30 10 34)"/>
+        <ellipse cx="13" cy="23" rx="3.2" ry="7" transform="rotate(-25 13 23)"/>
+        <ellipse cx="17" cy="13" rx="2.6" ry="6" transform="rotate(-18 17 13)"/>
+      </g>
+    </svg>
+    <div class="crest">🛡️</div>
+    <svg class="laurel laurel-right" viewBox="0 0 40 70" xmlns="http://www.w3.org/2000/svg">
+      <path d="M20 68 C 10 55, 8 40, 14 20 C 17 10, 20 4, 20 2" fill="none" stroke="var(--accent-dim)" stroke-width="1.3"/>
+      <g fill="var(--accent-dim)">
+        <ellipse cx="12" cy="58" rx="4" ry="9" transform="rotate(-35 12 58)"/>
+        <ellipse cx="9" cy="46" rx="4" ry="9" transform="rotate(-40 9 46)"/>
+        <ellipse cx="10" cy="34" rx="3.6" ry="8" transform="rotate(-30 10 34)"/>
+        <ellipse cx="13" cy="23" rx="3.2" ry="7" transform="rotate(-25 13 23)"/>
+        <ellipse cx="17" cy="13" rx="2.6" ry="6" transform="rotate(-18 17 13)"/>
+      </g>
+    </svg>
+  </div>
+  <h1 id="player-name-heading">Yükleniyor...</h1>
+  <p id="player-subtitle" class="muted"></p>
+</div>
+
+<main>
+  <section class="panel">
+    <p class="muted">Bu kahramanın hikayesi henüz yazılmadı. Yakında burada oyuncunun istatistikleri, favori medeniyetleri ve daha fazlası yer alacak.</p>
+  </section>
+
+  <section class="panel">
+    <h2>🏅 Kazanılan Rozetler</h2>
+    <div id="badges-list" class="muted">Yükleniyor...</div>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="auth.js"></script>
+<script>
+const params = new URLSearchParams(location.search);
+const playerName = params.get('oyuncu') || '';
+
+document.getElementById('player-name-heading').textContent = playerName || 'Bilinmeyen Kahraman';
+
+async function loadLinkedAccount() {
+  if (!playerName) return;
+  const { data: profile } = await supabaseClient
+    .from('profiles')
+    .select('username')
+    .eq('player_name', playerName)
+    .maybeSingle();
+
+  if (profile) {
+    document.getElementById('player-subtitle').textContent = `Bu kahramanı temsil eden üye: ${profile.username}`;
+  }
+}
+
+async function loadBadges() {
+  const listEl = document.getElementById('badges-list');
+  if (!playerName) {
+    listEl.innerHTML = `<p class="muted">Oyuncu belirtilmedi.</p>`;
+    return;
+  }
+
+  const { data: awards, error } = await supabaseClient
+    .from('game_badges')
+    .select('game_id, badges(name, icon, points, description), games(name, played_on, note)')
+    .eq('player_name', playerName)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    listEl.innerHTML = `<p class="error">Rozetler yüklenemedi.</p>`;
+    console.error(error);
+    return;
+  }
+
+  const valid = (awards || []).filter(a => a.badges);
+
+  if (valid.length === 0) {
+    listEl.innerHTML = `<p class="muted">Bu kahraman henüz bir rozet kazanmadı.</p>`;
+    return;
+  }
+
+  listEl.innerHTML = valid.map(a => {
+    const gameTitle = a.games ? (a.games.name || a.games.note || a.games.played_on) : null;
+    return `
+      <div class="member-row">
+        <div class="member-info">
+          <strong>${escapeHtml(a.badges.icon || '🏅')} ${escapeHtml(a.badges.name)}</strong>
+          ${a.badges.points ? `<span class="pill">${a.badges.points > 0 ? '+' : ''}${formatPoints(a.badges.points)} puan</span>` : ''}
+        </div>
+        ${gameTitle ? `<a href="oyun-detay.html?id=${a.game_id}">${escapeHtml(gameTitle)}</a>` : ''}
+      </div>
+      ${a.badges.description ? `<p class="muted" style="margin:0 0 0.6rem;">${escapeHtml(a.badges.description)}</p>` : ''}
+    `;
+  }).join('');
+}
+
+function formatPoints(n) {
+  n = Number(n);
+  return Number.isInteger(n) ? String(n) : n.toFixed(1);
+}
+
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+loadLinkedAccount();
+loadBadges();
+</script>
+</body>
+</html>

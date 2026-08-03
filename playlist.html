@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Çalma Listesi — Civ 6 Şeref Listesi</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+<div class="header-left">
+  <div id="auth-widget" class="auth-widget"></div>
+  <h1>🏛️ Civ 6 Şeref Listesi</h1>
+</div>
+<nav>
+<a href="index.html">Şeref Listesi</a>
+<a href="oyun-tarihi.html">Oyun Tarihi</a>
+<a href="rules.html">Kurallar</a>
+<a href="playlist.html" class="active">Çalma Listesi</a>
+<a href="admin.html">Yönetim</a>
+</nav>
+</header>
+
+<div class="hero-banner">
+<div class="hero-emblem">
+    <svg class="laurel laurel-left" viewBox="0 0 40 70" xmlns="http://www.w3.org/2000/svg">
+      <path d="M20 68 C 10 55, 8 40, 14 20 C 17 10, 20 4, 20 2" fill="none" stroke="var(--accent-dim)" stroke-width="1.3"/>
+      <g fill="var(--accent-dim)">
+        <ellipse cx="12" cy="58" rx="4" ry="9" transform="rotate(-35 12 58)"/>
+        <ellipse cx="9" cy="46" rx="4" ry="9" transform="rotate(-40 9 46)"/>
+        <ellipse cx="10" cy="34" rx="3.6" ry="8" transform="rotate(-30 10 34)"/>
+        <ellipse cx="13" cy="23" rx="3.2" ry="7" transform="rotate(-25 13 23)"/>
+        <ellipse cx="17" cy="13" rx="2.6" ry="6" transform="rotate(-18 17 13)"/>
+      </g>
+    </svg>
+    <div class="crest">🎶</div>
+    <svg class="laurel laurel-right" viewBox="0 0 40 70" xmlns="http://www.w3.org/2000/svg">
+      <path d="M20 68 C 10 55, 8 40, 14 20 C 17 10, 20 4, 20 2" fill="none" stroke="var(--accent-dim)" stroke-width="1.3"/>
+      <g fill="var(--accent-dim)">
+        <ellipse cx="12" cy="58" rx="4" ry="9" transform="rotate(-35 12 58)"/>
+        <ellipse cx="9" cy="46" rx="4" ry="9" transform="rotate(-40 9 46)"/>
+        <ellipse cx="10" cy="34" rx="3.6" ry="8" transform="rotate(-30 10 34)"/>
+        <ellipse cx="13" cy="23" rx="3.2" ry="7" transform="rotate(-25 13 23)"/>
+        <ellipse cx="17" cy="13" rx="2.6" ry="6" transform="rotate(-18 17 13)"/>
+      </g>
+    </svg>
+  </div>
+<h1>Kraliyet Nağme Sandığı</h1>
+<p>Medeniyetleri fethederken çalınacak ezgiler.</p>
+</div>
+
+<main>
+<section class="panel" id="compose-panel" style="display:none;">
+<h2>➕ Şarkı Ekle</h2>
+<label for="song-name">Şarkı / Parça Adı</label>
+<input type="text" id="song-name" placeholder="örn. Baba Yetu">
+<label for="song-url">Bağlantı (isteğe bağlı, tercihen YouTube)</label>
+<input type="text" id="song-url" placeholder="https://www.youtube.com/watch?v=...">
+<button id="song-submit-btn">Çalma Listesine Ekle</button>
+<div id="song-msg"></div>
+</section>
+
+<section class="panel" id="login-hint">
+<p class="muted">Şarkı eklemek için üst köşedeki <strong>Giriş Yap</strong> düğmesini kullan.</p>
+</section>
+
+<section class="panel">
+<h2>📜 Mevcut Çalma Listesi</h2>
+<div id="playlist-list" class="muted">Yükleniyor...</div>
+</section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="auth.js"></script>
+<script>
+const composePanel = document.getElementById('compose-panel');
+const loginHint = document.getElementById('login-hint');
+
+Civ6Auth.onChange(() => {
+  const loggedIn = !!(Civ6Auth.currentUser && Civ6Auth.currentUsername);
+  composePanel.style.display = loggedIn ? 'block' : 'none';
+  loginHint.style.display = loggedIn ? 'none' : 'block';
+  loadPlaylist();
+});
+
+document.getElementById('song-submit-btn').addEventListener('click', async () => {
+  const msgEl = document.getElementById('song-msg');
+  msgEl.textContent = '';
+  msgEl.className = '';
+
+  if (!Civ6Auth.currentUser || !Civ6Auth.currentUsername) {
+    msgEl.textContent = 'Şarkı eklemek için giriş yapmalısın.';
+    msgEl.className = 'error';
+    return;
+  }
+
+  const nameInput = document.getElementById('song-name');
+  const urlInput = document.getElementById('song-url');
+  const songName = nameInput.value.trim();
+  const songUrl = urlInput.value.trim();
+
+  if (!songName) {
+    msgEl.textContent = 'Şarkıya bir isim ver.';
+    msgEl.className = 'error';
+    return;
+  }
+
+  const { error } = await supabaseClient.from('playlist_songs').insert({
+    author_id: Civ6Auth.currentUser.id,
+    author_name: Civ6Auth.currentUsername,
+    song_name: songName,
+    song_url: songUrl || null
+  });
+
+  if (error) {
+    msgEl.textContent = 'Şarkı eklenemedi: ' + error.message;
+    msgEl.className = 'error';
+    return;
+  }
+
+  msgEl.textContent = 'Çalma listesine eklendi!';
+  msgEl.className = 'success';
+  nameInput.value = '';
+  urlInput.value = '';
+  loadPlaylist();
+});
+
+function getYouTubeId(url) {
+  if (!url) return null;
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtube\.com\/embed\/|youtu\.be\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/
+  ];
+  for (const p of patterns) {
+    const m = url.match(p);
+    if (m) return m[1];
+  }
+  return null;
+}
+
+async function loadPlaylist() {
+  const listEl = document.getElementById('playlist-list');
+
+  const { data: songs, error } = await supabaseClient
+    .from('playlist_songs')
+    .select('id, song_name, song_url, author_name, author_id, created_at')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    listEl.innerHTML = `<p class="error">Çalma listesi yüklenemedi.</p>`;
+    console.error(error);
+    return;
+  }
+
+  if (!songs || songs.length === 0) {
+    listEl.innerHTML = `<p class="muted">Henüz şarkı yok. İlk ekleyen sen ol!</p>`;
+    return;
+  }
+
+  listEl.innerHTML = songs.map(s => {
+    const date = new Date(s.created_at).toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' });
+    const canDelete = Civ6Auth.currentUser && s.author_id === Civ6Auth.currentUser.id;
+    const ytId = getYouTubeId(s.song_url);
+
+    let media = '';
+    if (ytId) {
+      media = `<a href="${escapeHtml(s.song_url)}" target="_blank" rel="noopener">
+        <img class="post-image" src="https://img.youtube.com/vi/${ytId}/mqdefault.jpg" alt="">
+      </a>`;
+    } else if (s.song_url) {
+      media = `<p><a href="${escapeHtml(s.song_url)}" target="_blank" rel="noopener">🔗 Dinle</a></p>`;
+    }
+
+    return `
+      <div class="post-card">
+        ${canDelete ? `<button class="delete-song" data-id="${s.id}">Sil</button>` : ''}
+        <h3>${escapeHtml(s.song_name)}</h3>
+        <div class="post-meta">${escapeHtml(s.author_name || 'Bilinmiyor')} tarafından eklendi · ${date}</div>
+        ${media}
+      </div>
+    `;
+  }).join('');
+
+  document.querySelectorAll('.delete-song').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!confirm('Bu şarkı çalma listesinden kaldırılsın mı?')) return;
+      await supabaseClient.from('playlist_songs').delete().eq('id', btn.dataset.id);
+      loadPlaylist();
+    });
+  });
+}
+
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+loadPlaylist();
+</script>
+</body>
+</html>

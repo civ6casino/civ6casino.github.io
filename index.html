@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Civ 6 Şeref Listesi</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div class="header-left">
+    <div id="auth-widget" class="auth-widget"></div>
+    <h1>🏛️ Civ 6 Şeref Listesi</h1>
+  </div>
+  <nav>
+    <a href="index.html" class="active">Şeref Listesi</a>
+    <a href="oyun-tarihi.html">Oyun Tarihi</a>
+    <a href="rules.html">Kurallar</a>
+    <a href="playlist.html">Çalma Listesi</a>
+    <a href="admin.html">Yönetim</a>
+  </nav>
+</header>
+
+<div class="hero-banner">
+  <div class="hero-emblem">
+    <svg class="laurel laurel-left" viewBox="0 0 40 70" xmlns="http://www.w3.org/2000/svg">
+      <path d="M20 68 C 10 55, 8 40, 14 20 C 17 10, 20 4, 20 2" fill="none" stroke="var(--accent-dim)" stroke-width="1.3"/>
+      <g fill="var(--accent-dim)">
+        <ellipse cx="12" cy="58" rx="4" ry="9" transform="rotate(-35 12 58)"/>
+        <ellipse cx="9" cy="46" rx="4" ry="9" transform="rotate(-40 9 46)"/>
+        <ellipse cx="10" cy="34" rx="3.6" ry="8" transform="rotate(-30 10 34)"/>
+        <ellipse cx="13" cy="23" rx="3.2" ry="7" transform="rotate(-25 13 23)"/>
+        <ellipse cx="17" cy="13" rx="2.6" ry="6" transform="rotate(-18 17 13)"/>
+      </g>
+    </svg>
+    <div class="crest">👑</div>
+    <svg class="laurel laurel-right" viewBox="0 0 40 70" xmlns="http://www.w3.org/2000/svg">
+      <path d="M20 68 C 10 55, 8 40, 14 20 C 17 10, 20 4, 20 2" fill="none" stroke="var(--accent-dim)" stroke-width="1.3"/>
+      <g fill="var(--accent-dim)">
+        <ellipse cx="12" cy="58" rx="4" ry="9" transform="rotate(-35 12 58)"/>
+        <ellipse cx="9" cy="46" rx="4" ry="9" transform="rotate(-40 9 46)"/>
+        <ellipse cx="10" cy="34" rx="3.6" ry="8" transform="rotate(-30 10 34)"/>
+        <ellipse cx="13" cy="23" rx="3.2" ry="7" transform="rotate(-25 13 23)"/>
+        <ellipse cx="17" cy="13" rx="2.6" ry="6" transform="rotate(-18 17 13)"/>
+      </g>
+    </svg>
+  </div>
+  <h1>Şeref Tapınağı</h1>
+  <p>Zafer, diplomasiye güvenmeyip mancınığa güvenenlerin olsun.</p>
+</div>
+
+<main>
+  <section class="panel panel-spotlight">
+    <h2>🏆 Sıralama</h2>
+    <p class="muted">Yalnızca dereceli ve tamamlanmış oyunlardaki toplam puanlar.</p>
+    <div class="leaderboard-grid" id="leaderboard-grid">
+      <div class="lb-head-row">
+        <span>#</span><span>Oyuncu</span><span>Puan / Oyun</span>
+      </div>
+      <div id="leaderboard-body" class="muted">Yükleniyor...</div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>📊 Oyuna Göre Puanlar</h2>
+    <p class="muted">Her dereceli ve tamamlanmış oyunda oyuncuların aldığı puanlar.</p>
+    <div class="table-scroll">
+      <table id="matrix-table">
+        <thead id="matrix-head">
+          <tr><th>Oyuncu</th></tr>
+        </thead>
+        <tbody id="matrix-body">
+          <tr><td class="muted">Yükleniyor...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel" id="meydan-panel">
+    <h2>🏟️ Meydan</h2>
+    <p class="muted">Kısa notlar, anlık düşünceler ve oyun içi anlar — en fazla 180 karakter.</p>
+
+    <div id="entry-compose" style="display:none;">
+      <div id="entry-game-tag-row" style="display:none;">
+        <label for="entry-game-select">Oyun Etiketi (isteğe bağlı)</label>
+        <select id="entry-game-select">
+          <option value="">— Yok —</option>
+        </select>
+      </div>
+      <label for="entry-body">Notun</label>
+      <textarea id="entry-body" maxlength="180" placeholder="Ne oluyor?"></textarea>
+      <div class="entry-compose-footer">
+        <span id="entry-char-count" class="muted">180 karakter kaldı</span>
+        <button id="entry-submit-btn">Paylaş</button>
+      </div>
+      <div id="entry-msg"></div>
+    </div>
+
+    <div id="entry-login-hint">
+      <p class="muted">Paylaşım yapmak için üst sol köşedeki <strong>Giriş Yap</strong> düğmesini kullan.</p>
+    </div>
+
+    <div id="entries-list" class="muted">Yükleniyor...</div>
+  </section>
+
+  <section class="panel">
+    <h2>📜 Oyun Tarihi</h2>
+    <p class="muted">Tüm oyunları — dereceli ya da değil, devam eden ya da tamamlanmış — detaylarıyla görmek için Oyun Tarihi sayfasına göz at.</p>
+    <a href="oyun-tarihi.html"><button>Oyun Tarihine Git</button></a>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="auth.js"></script>
+<script>
+const MEDALS = ['👑', '🥈', '🥉'];
+const ROSTER = ['Yusuf', 'Eren', 'Arda', 'Alperen', 'Taha', 'Ayaz'];
+
+const entryComposeEl = document.getElementById('entry-compose');
+const entryLoginHintEl = document.getElementById('entry-login-hint');
+const entryGameTagRow = document.getElementById('entry-game-tag-row');
+const entryGameSelect = document.getElementById('entry-game-select');
+const entryBodyInput = document.getElementById('entry-body');
+const entryCharCount = document.getElementById('entry-char-count');
+
+entryBodyInput.addEventListener('input', () => {
+  const remaining = 180 - entryBodyInput.value.length;
+  entryCharCount.textContent = `${remaining} karakter kaldı`;
+  entryCharCount.className = remaining < 0 ? 'error' : 'muted';
+});
+
+Civ6Auth.onChange(() => {
+  const loggedIn = !!(Civ6Auth.currentUser && Civ6Auth.currentUsername);
+  entryComposeEl.style.display = loggedIn ? 'block' : 'none';
+  entryLoginHintEl.style.display = loggedIn ? 'none' : 'block';
+  if (loggedIn) loadInProgressGamesForTag();
+  loadEntries();
+});
+
+async function loadInProgressGamesForTag() {
+  const { data: games } = await supabaseClient
+    .from('games')
+    .select('id, name, played_on')
+    .eq('status', 'in_progress')
+    .order('created_at', { ascending: false });
+
+  if (!games || games.length === 0) {
+    entryGameTagRow.style.display = 'none';
+    entryGameSelect.innerHTML = '<option value="">— Yok —</option>';
+    return;
+  }
+
+  entryGameTagRow.style.display = 'block';
+  entryGameSelect.innerHTML = '<option value="">— Yok —</option>' +
+    games.map(g => `<option value="${g.id}">${escapeHtml(g.name || g.played_on)}</option>`).join('');
+}
+
+document.getElementById('entry-submit-btn').addEventListener('click', async () => {
+  const msgEl = document.getElementById('entry-msg');
+  msgEl.textContent = '';
+  msgEl.className = '';
+
+  if (!Civ6Auth.currentUser || !Civ6Auth.currentUsername) {
+    msgEl.textContent = 'Paylaşım yapmak için giriş yapmalısın.';
+    msgEl.className = 'error';
+    return;
+  }
+
+  const body = entryBodyInput.value.trim();
+  if (!body) {
+    msgEl.textContent = 'Boş bir not paylaşamazsın.';
+    msgEl.className = 'error';
+    return;
+  }
+  if (body.length > 180) {
+    msgEl.textContent = 'En fazla 180 karakter olabilir.';
+    msgEl.className = 'error';
+    return;
+  }
+
+  const gameId = entryGameSelect.value || null;
+
+  const { error } = await supabaseClient.from('entries').insert({
+    author_id: Civ6Auth.currentUser.id,
+    author_name: Civ6Auth.currentUsername,
+    body,
+    game_id: gameId
+  });
+
+  if (error) {
+    msgEl.textContent = 'Paylaşılamadı: ' + error.message;
+    msgEl.className = 'error';
+    return;
+  }
+
+  entryBodyInput.value = '';
+  entryCharCount.textContent = '180 karakter kaldı';
+  entryCharCount.className = 'muted';
+  entryGameSelect.value = '';
+  msgEl.textContent = 'Paylaşıldı!';
+  msgEl.className = 'success';
+  loadEntries();
+});
+
+async function loadEntries() {
+  const listEl = document.getElementById('entries-list');
+  const { data: entries, error } = await supabaseClient
+    .from('entries')
+    .select('id, body, author_name, author_id, created_at, game_id, games(name, played_on)')
+    .order('created_at', { ascending: false })
+    .limit(50);
+
+  if (error) {
+    listEl.innerHTML = `<p class="error">Notlar yüklenemedi.</p>`;
+    console.error(error);
+    return;
+  }
+
+  if (!entries || entries.length === 0) {
+    listEl.innerHTML = `<p class="muted">Henüz not yok. İlk paylaşan sen ol!</p>`;
+    return;
+  }
+
+  listEl.innerHTML = entries.map(e => {
+    const date = new Date(e.created_at).toLocaleString('tr-TR', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
+    const canDelete = Civ6Auth.currentUser && (e.author_id === Civ6Auth.currentUser.id || Civ6Auth.isAdmin);
+    const gameTag = e.games ? `<span class="pill">🎮 ${escapeHtml(e.games.name || e.games.played_on)}</span>` : '';
+    return `
+      <div class="entry-card">
+        ${canDelete ? `<div class="card-actions"><button class="danger entry-delete-btn" data-id="${e.id}">Sil</button></div>` : ''}
+        <div class="entry-meta">${escapeHtml(e.author_name || 'Bilinmiyor')} · ${date} ${gameTag}</div>
+        <div class="entry-body">${escapeHtml(e.body)}</div>
+      </div>
+    `;
+  }).join('');
+
+  document.querySelectorAll('.entry-delete-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!confirm('Bu not silinsin mi?')) return;
+      await supabaseClient.from('entries').delete().eq('id', btn.dataset.id);
+      loadEntries();
+    });
+  });
+}
+
+loadEntries();
+
+async function loadData() {
+  const { data: games, error: gErr } = await supabaseClient
+    .from('games')
+    .select('id, played_on, name, created_at, results(player_name, rank, points), game_badges(player_name, badges(name, icon, points))')
+    .eq('status', 'completed')
+    .eq('ranked', true)
+    .order('created_at', { ascending: true });
+
+  const leaderboardBody = document.getElementById('leaderboard-body');
+  const matrixHead = document.getElementById('matrix-head');
+  const matrixBody = document.getElementById('matrix-body');
+
+  if (gErr) {
+    leaderboardBody.innerHTML = `<p class="error">Veriler yüklenemedi. config.js dosyasının doğru ayarlandığından emin olun.</p>`;
+    matrixBody.innerHTML = `<tr><td class="error">Veriler yüklenemedi.</td></tr>`;
+    console.error(gErr);
+    return;
+  }
+
+  const gameList = games || [];
+
+  // Toplamları hesapla — kadro her zaman görünür, 0 oyunla bile.
+  // Rozet bonus puanları da (yalnızca dereceli/tamamlanmış oyunlarda) dahil edilir.
+  const totals = {};
+  ROSTER.forEach(name => { totals[name] = { points: 0, games: 0 }; });
+  gameList.forEach(g => {
+    (g.results || []).forEach(r => {
+      if (!totals[r.player_name]) totals[r.player_name] = { points: 0, games: 0 };
+      totals[r.player_name].points += r.points;
+      totals[r.player_name].games += 1;
+    });
+    (g.game_badges || []).forEach(a => {
+      if (!a.badges) return;
+      if (!totals[a.player_name]) totals[a.player_name] = { points: 0, games: 0 };
+      totals[a.player_name].points += a.badges.points;
+    });
+  });
+
+  const sorted = Object.entries(totals).sort((a, b) => b[1].points - a[1].points);
+
+  leaderboardBody.innerHTML = sorted.map(([name, stats], i) => `
+    <div class="lb-row${i < 3 ? ' rank-' + (i + 1) : ''}">
+      <span class="lb-rank">${i + 1}</span>
+      <span class="lb-name">${i < 3 ? `<span class="medal">${MEDALS[i]}</span>` : ''}<a href="profil.html?oyuncu=${encodeURIComponent(name)}">${escapeHtml(name)}</a></span>
+      <span class="lb-stats"><strong>${formatPoints(stats.points)}</strong> puan · ${stats.games} oyun</span>
+    </div>
+  `).join('');
+
+  // Oyuna göre puanlar matrisi — sütunlar oyunlar, satırlar sabit kadro
+  if (gameList.length === 0) {
+    matrixHead.innerHTML = '<tr><th>Oyuncu</th><th>—</th></tr>';
+    matrixBody.innerHTML = `<tr><td class="muted">Henüz dereceli, tamamlanmış oyun yok.</td><td class="muted">—</td></tr>`;
+    return;
+  }
+
+  matrixHead.innerHTML = '<tr><th>Oyuncu</th>' + gameList.map(g => `<th>${escapeHtml(g.name || g.played_on)}</th>`).join('') + '</tr>';
+
+  matrixBody.innerHTML = ROSTER.map(name => {
+    const cells = gameList.map(g => {
+      const r = (g.results || []).find(res => res.player_name === name);
+      const badgeAwards = (g.game_badges || []).filter(a => a.player_name === name && a.badges);
+
+      if (!r && badgeAwards.length === 0) return '<td>–</td>';
+
+      const basePoints = r ? r.points : 0;
+      const bonusPoints = badgeAwards.reduce((sum, a) => sum + a.badges.points, 0);
+      const total = basePoints + bonusPoints;
+      const badgeIcons = badgeAwards.map(a => a.badges.icon || '🏅').join('');
+      const tooltip = badgeAwards.map(a => `${a.badges.name} (${a.badges.points > 0 ? '+' : ''}${formatPoints(a.badges.points)})`).join(', ');
+
+      return `<td${tooltip ? ` title="${escapeHtml(tooltip)}"` : ''}>${formatPoints(total)}${badgeIcons ? ` ${badgeIcons}` : ''}</td>`;
+    }).join('');
+    return `<tr><td><a href="profil.html?oyuncu=${encodeURIComponent(name)}">${escapeHtml(name)}</a></td>${cells}</tr>`;
+  }).join('');
+}
+
+function formatPoints(n) {
+  n = Number(n);
+  return Number.isInteger(n) ? String(n) : n.toFixed(1);
+}
+
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+loadData();
+</script>
+</body>
+</html>

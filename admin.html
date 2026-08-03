@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yönetim — Civ 6 Şeref Listesi</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div class="header-left">
+    <div id="auth-widget" class="auth-widget"></div>
+    <h1>🏛️ Civ 6 Şeref Listesi</h1>
+  </div>
+  <nav>
+    <a href="index.html">Şeref Listesi</a>
+    <a href="oyun-tarihi.html">Oyun Tarihi</a>
+    <a href="rules.html">Kurallar</a>
+    <a href="playlist.html">Çalma Listesi</a>
+    <a href="admin.html" class="active">Yönetim</a>
+  </nav>
+</header>
+
+<div class="hero-banner">
+  <div class="hero-emblem">
+    <svg class="laurel laurel-left" viewBox="0 0 40 70" xmlns="http://www.w3.org/2000/svg">
+      <path d="M20 68 C 10 55, 8 40, 14 20 C 17 10, 20 4, 20 2" fill="none" stroke="var(--accent-dim)" stroke-width="1.3"/>
+      <g fill="var(--accent-dim)">
+        <ellipse cx="12" cy="58" rx="4" ry="9" transform="rotate(-35 12 58)"/>
+        <ellipse cx="9" cy="46" rx="4" ry="9" transform="rotate(-40 9 46)"/>
+        <ellipse cx="10" cy="34" rx="3.6" ry="8" transform="rotate(-30 10 34)"/>
+        <ellipse cx="13" cy="23" rx="3.2" ry="7" transform="rotate(-25 13 23)"/>
+        <ellipse cx="17" cy="13" rx="2.6" ry="6" transform="rotate(-18 17 13)"/>
+      </g>
+    </svg>
+    <div class="crest">⚔️</div>
+    <svg class="laurel laurel-right" viewBox="0 0 40 70" xmlns="http://www.w3.org/2000/svg">
+      <path d="M20 68 C 10 55, 8 40, 14 20 C 17 10, 20 4, 20 2" fill="none" stroke="var(--accent-dim)" stroke-width="1.3"/>
+      <g fill="var(--accent-dim)">
+        <ellipse cx="12" cy="58" rx="4" ry="9" transform="rotate(-35 12 58)"/>
+        <ellipse cx="9" cy="46" rx="4" ry="9" transform="rotate(-40 9 46)"/>
+        <ellipse cx="10" cy="34" rx="3.6" ry="8" transform="rotate(-30 10 34)"/>
+        <ellipse cx="13" cy="23" rx="3.2" ry="7" transform="rotate(-25 13 23)"/>
+        <ellipse cx="17" cy="13" rx="2.6" ry="6" transform="rotate(-18 17 13)"/>
+      </g>
+    </svg>
+  </div>
+  <h1>Divan Odası</h1>
+  <p>Savaşın sonucunu yalnızca yönetici kayda geçirebilir.</p>
+</div>
+
+<main>
+  <section class="panel" id="not-logged-in-panel">
+    <div class="access-denied">
+      <p class="muted">Bu sayfaya erişmek için üst sol köşedeki <strong>Giriş Yap</strong> düğmesini kullan.</p>
+    </div>
+  </section>
+
+  <section class="panel" id="not-admin-panel" style="display:none;">
+    <div class="access-denied">
+      <p class="muted">Bu sayfaya yalnızca yöneticiler erişebilir.</p>
+    </div>
+  </section>
+
+  <section class="panel" id="new-game-panel" style="display:none;">
+    <h2>🚩 Yeni Bir Oyun Başlat</h2>
+
+    <label for="game-date">Tarih</label>
+    <input type="date" id="game-date">
+
+    <label for="game-name">Oyun Adı</label>
+    <input type="text" id="game-name" placeholder="örn. 2026 Büyük Savaşı">
+
+    <label for="game-description">Açıklama (isteğe bağlı)</label>
+    <textarea id="game-description" placeholder="Harita türü, hız, kural seti — oyun başlamadan önce belirtilmesi gereken her şey..."></textarea>
+
+    <div class="checkbox-row">
+      <input type="checkbox" id="game-ranked" checked>
+      <label for="game-ranked">Dereceli oyun (şeref listesine sayılsın)</label>
+    </div>
+
+    <button id="start-game-btn">Oyunu Başlat</button>
+    <div id="start-game-msg"></div>
+  </section>
+
+  <section class="panel" id="in-progress-panel" style="display:none;">
+    <h2>⏳ Devam Eden Oyunlar</h2>
+    <div id="in-progress-list" class="muted">Yükleniyor...</div>
+  </section>
+
+  <section class="panel" id="manage-panel" style="display:none;">
+    <h2>📜 Kayıtlı Oyunlar</h2>
+    <div id="manage-list" class="muted">Yükleniyor...</div>
+  </section>
+
+  <section class="panel" id="badges-panel" style="display:none;">
+    <h2>🏅 Rozetler</h2>
+    <p class="muted">Oyun sonunda oyunculara verilebilecek rozet türlerini burada tanımla. Bonus puanlı bir rozet, aldığı oyuncunun Şeref Listesi toplamına eklenir (yalnızca dereceli ve tamamlanmış oyunlarda). Rozetlerin kendisini belirli bir oyuna ve oyuncuya vermek için "Kayıtlı Oyunlar" listesindeki "Rozet Ver" düğmesini kullan.</p>
+    <div id="badges-list" class="muted">Yükleniyor...</div>
+
+    <h3 style="margin-top:1.4rem;">Yeni Rozet Oluştur</h3>
+    <label for="badge-name">Ad</label>
+    <input type="text" id="badge-name" placeholder="örn. Büyük Savunmacı">
+    <label for="badge-icon">İkon (emoji)</label>
+    <input type="text" id="badge-icon" placeholder="🛡️" maxlength="4">
+    <label for="badge-points">Bonus Puan</label>
+    <input type="number" id="badge-points" value="0" step="0.5">
+    <label for="badge-description">Açıklama (isteğe bağlı)</label>
+    <textarea id="badge-description" placeholder="Bu rozet ne için verilir?"></textarea>
+    <button id="badge-create-btn">Rozet Oluştur</button>
+    <div id="badge-create-msg"></div>
+  </section>
+
+  <section class="panel" id="members-panel" style="display:none;">
+    <h2>👥 Üyeler</h2>
+    <p class="muted">Bir üyeyi Şeref Listesi'ndeki bir oyuncuyla eşleştirirsen, o oyuncunun profil sayfasında bu üyenin adı görünür.</p>
+    <div id="members-list" class="muted">Yükleniyor...</div>
+    <div id="members-msg"></div>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="auth.js"></script>
+<script>
+const RANK_LABELS = ['1.', '2.', '3.', '4.', '5.', '6.'];
+const RANK_POINTS = [7, 3, 3, 2, 1, 1];
+const ROSTER = ['Yusuf', 'Eren', 'Arda', 'Alperen', 'Taha', 'Ayaz'];
+
+const notLoggedInPanel = document.getElementById('not-logged-in-panel');
+const notAdminPanel = document.getElementById('not-admin-panel');
+const newGamePanel = document.getElementById('new-game-panel');
+const inProgressPanel = document.getElementById('in-progress-panel');
+const managePanel = document.getElementById('manage-panel');
+const badgesPanel = document.getElementById('badges-panel');
+const membersPanel = document.getElementById('members-panel');
+
+let badgesCache = [];
+
+document.getElementById('game-date').value = new Date().toISOString().slice(0, 10);
+
+Civ6Auth.onChange(() => {
+  const loggedIn = !!Civ6Auth.currentUser;
+  const admin = Civ6Auth.isAdmin;
+
+  notLoggedInPanel.style.display = !loggedIn ? 'block' : 'none';
+  notAdminPanel.style.display = (loggedIn && !admin) ? 'block' : 'none';
+
+  const showAdmin = loggedIn && admin;
+  newGamePanel.style.display = showAdmin ? 'block' : 'none';
+  inProgressPanel.style.display = showAdmin ? 'block' : 'none';
+  managePanel.style.display = showAdmin ? 'block' : 'none';
+  badgesPanel.style.display = showAdmin ? 'block' : 'none';
+  membersPanel.style.display = showAdmin ? 'block' : 'none';
+
+  if (showAdmin) {
+    loadBadgesCache().then(() => {
+      loadInProgressList();
+      loadManageList();
+      loadBadgesList();
+    });
+    loadMembers();
+  }
+});
+
+document.getElementById('start-game-btn').addEventListener('click', async () => {
+  const msgEl = document.getElementById('start-game-msg');
+  msgEl.textContent = '';
+  msgEl.className = '';
+
+  const playedOn = document.getElementById('game-date').value;
+  const name = document.getElementById('game-name').value.trim();
+  const description = document.getElementById('game-description').value.trim();
+  const ranked = document.getElementById('game-ranked').checked;
+
+  if (!name) {
+    msgEl.textContent = 'Oyuna bir isim ver.';
+    msgEl.className = 'error';
+    return;
+  }
+
+  const { error } = await supabaseClient.from('games').insert({
+    played_on: playedOn,
+    name,
+    description: description || null,
+    status: 'in_progress',
+    ranked
+  });
+
+  if (error) {
+    msgEl.textContent = 'Oyun başlatılamadı: ' + error.message;
+    msgEl.className = 'error';
+    return;
+  }
+
+  msgEl.textContent = 'Oyun başladı! Bittiğinde sonuçları aşağıya ekle.';
+  msgEl.className = 'success';
+  document.getElementById('game-name').value = '';
+  document.getElementById('game-description').value = '';
+  document.getElementById('game-ranked').checked = true;
+  loadInProgressList();
+});
+
+async function loadInProgressList() {
+  const listEl = document.getElementById('in-progress-list');
+  const { data: games, error } = await supabaseClient
+    .from('games')
+    .select('id, played_on, name, description, info_text, ranked, cover_image_url')
+    .eq('status', 'in_progress')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    listEl.innerHTML = `<p class="error">Devam eden oyunlar yüklenemedi.</p>`;
+    return;
+  }
+
+  if (!games || games.length === 0) {
+    listEl.innerHTML = `<p class="muted">Devam eden oyun yok. Yukarıdan bir tane başlat.</p>`;
+    return;
+  }
+
+  listEl.innerHTML = games.map(g => `
+    <div class="game-card">
+      <div class="date-row">
+        <div class="date-info">
+          ${g.played_on} · <span class="pill">Devam Ediyor</span> <span class="pill${g.ranked ? '' : ' dim'}">${g.ranked ? 'Dereceli' : 'Derecesiz'}</span>
+        </div>
+        <div class="card-actions">
+          <button data-id="${g.id}" data-ranked="${g.ranked}" class="secondary toggle-ranked">${g.ranked ? 'Derecesiz Yap' : 'Dereceli Yap'}</button>
+          <button data-id="${g.id}" class="secondary edit-desc-btn">⚙️ Açıklama</button>
+          <button data-id="${g.id}" class="secondary edit-gameinfo-btn">📖 Oyun Bilgisi</button>
+          <button data-id="${g.id}" class="secondary cover-photo-btn">🖼️ Kapak Fotoğrafı</button>
+        </div>
+      </div>
+      <h3 style="margin:0.3rem 0;">${escapeHtml(g.name)}</h3>
+      ${g.description ? `<p class="muted">${escapeHtml(g.description)}</p>` : ''}
+      ${g.cover_image_url ? `<img class="post-image" src="${g.cover_image_url}" style="max-height:160px;" alt="">` : ''}
+      <button class="finish-game-btn" data-id="${g.id}">Oyunu Bitir</button>
+      <div class="finish-form" id="finish-form-${g.id}" style="display:none; margin-top:1rem;"></div>
+      <div class="edit-desc-form" id="edit-desc-form-${g.id}" style="display:none; margin-top:1rem;">
+        <label>Açıklama (harita türü, hız, kural seti, notlar...)</label>
+        <textarea class="edit-desc-textarea" placeholder="Harita türü, hız, kural seti, notlar...">${escapeHtml(g.description || '')}</textarea>
+        <button class="edit-desc-save-btn" data-id="${g.id}">Kaydet</button>
+        <div class="edit-desc-msg"></div>
+      </div>
+      <div class="edit-gameinfo-form" id="edit-gameinfo-form-${g.id}" style="display:none; margin-top:1rem;">
+        <label>Oyun Bilgisi — oyunun kendi sayfasında, kapak fotoğrafının altında öne çıkan şekilde gösterilir</label>
+        <textarea class="edit-gameinfo-textarea" placeholder="Bu oyunun kısa bir anlatısı ya da öne çıkan notu...">${escapeHtml(g.info_text || '')}</textarea>
+        <button class="edit-gameinfo-save-btn" data-id="${g.id}">Kaydet</button>
+        <div class="edit-gameinfo-msg"></div>
+      </div>
+      <div class="cover-photo-form" id="cover-photo-form-${g.id}" style="display:none; margin-top:1rem;">
+        ${g.cover_image_url ? `<img class="post-image" src="${g.cover_image_url}" style="max-height:160px;" alt="">` : '<p class="muted">Henüz kapak fotoğrafı yok.</p>'}
+        <input type="file" class="cover-photo-file" accept="image/*">
+        <button class="cover-photo-save-btn" data-id="${g.id}">Yükle</button>
+        ${g.cover_image_url ? `<button type="button" class="secondary cover-photo-remove-btn" data-id="${g.id}">Kaldır</button>` : ''}
+        <div class="cover-photo-msg"></div>
+      </div>
+    </div>
+  `).join('');
+
+  document.querySelectorAll('.finish-game-btn').forEach(btn => {
+    btn.addEventListener('click', () => openFinishForm(btn.dataset.id));
+  });
+
+  document.querySelectorAll('.edit-desc-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const formEl = document.getElementById(`edit-desc-form-${btn.dataset.id}`);
+      formEl.style.display = formEl.style.display === 'block' ? 'none' : 'block';
+    });
+  });
+
+  document.querySelectorAll('.edit-desc-save-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const gameId = btn.dataset.id;
+      const formEl = document.getElementById(`edit-desc-form-${gameId}`);
+      const msgEl = formEl.querySelector('.edit-desc-msg');
+      const text = formEl.querySelector('.edit-desc-textarea').value.trim();
+
+      const { error: updErr } = await supabaseClient.from('games').update({ description: text || null }).eq('id', gameId);
+      if (updErr) {
+        msgEl.textContent = 'Kaydedilemedi: ' + updErr.message;
+        msgEl.className = 'error';
+        return;
+      }
+
+      loadInProgressList();
+    });
+  });
+
+  document.querySelectorAll('.edit-gameinfo-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const formEl = document.getElementById(`edit-gameinfo-form-${btn.dataset.id}`);
+      formEl.style.display = formEl.style.display === 'block' ? 'none' : 'block';
+    });
+  });
+
+  document.querySelectorAll('.edit-gameinfo-save-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const gameId = btn.dataset.id;
+      const formEl = document.getElementById(`edit-gameinfo-form-${gameId}`);
+      const msgEl = formEl.querySelector('.edit-gameinfo-msg');
+      const text = formEl.querySelector('.edit-gameinfo-textarea').value.trim();
+
+      const { error: updErr } = await supabaseClient.from('games').update({ info_text: text || null }).eq('id', gameId);
+      if (updErr) {
+        msgEl.textContent = 'Kaydedilemedi: ' + updErr.message;
+        msgEl.className = 'error';
+        return;
+      }
+
+      loadInProgressList();
+    });
+  });
+
+  document.querySelectorAll('.cover-photo-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const formEl = document.getElementById(`cover-photo-form-${btn.dataset.id}`);
+      formEl.style.display = formEl.style.display === 'block' ? 'none' : 'block';
+    });
+  });
+
+  document.querySelectorAll('.cover-photo-save-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const gameId = btn.dataset.id;
+      const formEl = document.getElementById(`cover-photo-form-${gameId}`);
+      const msgEl = formEl.querySelector('.cover-photo-msg');
+      const fileInput = formEl.querySelector('.cover-photo-file');
+      const file = fileInput.files[0];
+
+      if (!file) {
+        msgEl.textContent = 'Önce bir fotoğraf seç.';
+        msgEl.className = 'error';
+        return;
+      }
+
+      msgEl.textContent = 'Yükleniyor...';
+      msgEl.className = 'muted';
+
+      const path = `${gameId}/cover_${Date.now()}_${file.name.replace(/[^a-zA-Z0-9_.-]/g, '_')}`;
+      const { error: upErr } = await supabaseClient.storage.from('game-images').upload(path, file);
+      if (upErr) {
+        msgEl.textContent = 'Yüklenemedi: ' + upErr.message;
+        msgEl.className = 'error';
+        return;
+      }
+
+      const { data: pub } = supabaseClient.storage.from('game-images').getPublicUrl(path);
+      const { error: updErr } = await supabaseClient.from('games').update({ cover_image_url: pub.publicUrl }).eq('id', gameId);
+      if (updErr) {
+        msgEl.textContent = 'Kaydedilemedi: ' + updErr.message;
+        msgEl.className = 'error';
+        return;
+      }
+
+      loadInProgressList();
+    });
+  });
+
+  document.querySelectorAll('.cover-photo-remove-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      await supabaseClient.from('games').update({ cover_image_url: null }).eq('id', btn.dataset.id);
+      loadInProgressList();
+    });
+  });
+
+  document.querySelectorAll('.toggle-ranked').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const newRanked = btn.dataset.ranked !== 'true';
+      await supabaseClient.from('games').update({ ranked: newRanked }).eq('id', btn.dataset.id);
+      loadInProgressList();
+      loadManageList();
+    });
+  });
+}
+
+function openFinishForm(gameId) {
+  const formEl = document.getElementById(`finish-form-${gameId}`);
+  if (formEl.style.display === 'block') {
+    formEl.style.display = 'none';
+    return;
+  }
+
+  formEl.style.display = 'block';
+  formEl.innerHTML = `
+    ${RANK_LABELS.map((label, i) => `
+      <label>${label} sıra (${RANK_POINTS[i]} puan)</label>
+      <select class="finish-rank" data-rank="${i}">
+        <option value="">— Seç —</option>
+        ${ROSTER.map(p => `<option value="${p}">${p}</option>`).join('')}
+      </select>
+    `).join('')}
+    <label>Öne Çıkanlar &amp; Detaylı Tarihçe</label>
+    <textarea class="finish-highlights" placeholder="Ne oldu? Önemli anlar, ihanetler, geri dönüşler, nihai skorlar..."></textarea>
+    <label>Fotoğraflar (isteğe bağlı, birden fazla eklenebilir)</label>
+    <input type="file" class="finish-photos" accept="image/*" multiple>
+    <button class="finish-submit-btn" data-id="${gameId}">Kaydet &amp; Oyunu Tamamla</button>
+    <div class="finish-msg"></div>
+  `;
+
+  formEl.querySelector('.finish-submit-btn').addEventListener('click', () => submitFinishForm(gameId, formEl));
+}
+
+async function submitFinishForm(gameId, formEl) {
+  const msgEl = formEl.querySelector('.finish-msg');
+  msgEl.textContent = '';
+  msgEl.className = '';
+
+  const selected = [];
+  const entries = [];
+  let duplicate = false;
+
+  formEl.querySelectorAll('.finish-rank').forEach(sel => {
+    const name = sel.value.trim();
+    const rank = parseInt(sel.dataset.rank, 10);
+    if (name) {
+      if (selected.includes(name)) duplicate = true;
+      selected.push(name);
+      entries.push({ player_name: name, rank: rank + 1, points: RANK_POINTS[rank], game_id: gameId });
+    }
+  });
+
+  if (duplicate) {
+    msgEl.textContent = 'Bir oyuncu birden fazla sırada seçilemez.';
+    msgEl.className = 'error';
+    return;
+  }
+
+  if (entries.length < 2) {
+    msgEl.textContent = 'En az 2 oyuncu seç.';
+    msgEl.className = 'error';
+    return;
+  }
+
+  const highlights = formEl.querySelector('.finish-highlights').value.trim();
+  const files = formEl.querySelector('.finish-photos').files;
+
+  const { error: rErr } = await supabaseClient.from('results').insert(entries);
+  if (rErr) {
+    msgEl.textContent = 'Sonuçlar kaydedilemedi: ' + rErr.message;
+    msgEl.className = 'error';
+    return;
+  }
+
+  for (const file of files) {
+    const path = `${gameId}/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9_.-]/g, '_')}`;
+    const { error: upErr } = await supabaseClient.storage.from('game-images').upload(path, file);
+    if (upErr) {
+      msgEl.textContent = 'Fotoğraf yüklenemedi: ' + upErr.message;
+      msgEl.className = 'error';
+      return;
+    }
+    const { data: publicUrlData } = supabaseClient.storage.from('game-images').getPublicUrl(path);
+    await supabaseClient.from('game_images').insert({ game_id: gameId, image_url: publicUrlData.publicUrl });
+  }
+
+  const { error: gErr } = await supabaseClient
+    .from('games')
+    .update({ status: 'completed', highlights: highlights || null })
+    .eq('id', gameId);
+
+  if (gErr) {
+    msgEl.textContent = 'Oyun tamamlanamadı: ' + gErr.message;
+    msgEl.className = 'error';
+    return;
+  }
+
+  msgEl.textContent = 'Oyun tamamlandı!';
+  msgEl.className = 'success';
+  loadInProgressList();
+  loadManageList();
+}
+
+async function loadManageList() {
+  const listEl = document.getElementById('manage-list');
+  const { data: games, error } = await supabaseClient
+    .from('games')
+    .select('id, played_on, name, description, info_text, highlights, note, ranked, poll_closed, cover_image_url, results(player_name, rank, points), game_images(image_url), game_badges(badge_id, player_name, badges(name, icon, points))')
+    .eq('status', 'completed')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    listEl.innerHTML = `<p class="error">Oyunlar yüklenemedi.</p>`;
+    return;
+  }
+
+  if (!games || games.length === 0) {
+    listEl.innerHTML = `<p class="muted">Henüz tamamlanmış oyun yok.</p>`;
+    return;
+  }
+
+  listEl.innerHTML = games.map(g => {
+    const sorted = (g.results || []).slice().sort((a, b) => a.rank - b.rank);
+    const title = g.name || g.note || `${g.played_on} tarihli oyun`;
+    const awarded = g.game_badges || [];
+    return `
+      <div class="game-card">
+        <div class="date-row">
+          <div class="date-info">
+            ${g.played_on} · <span class="pill${g.ranked ? '' : ' dim'}">${g.ranked ? 'Dereceli' : 'Derecesiz'}</span>
+          </div>
+          <div class="card-actions">
+            <button data-id="${g.id}" data-ranked="${g.ranked}" class="secondary toggle-ranked">${g.ranked ? 'Derecesiz Yap' : 'Dereceli Yap'}</button>
+            <button data-id="${g.id}" class="secondary award-badges-btn">🏅 Rozet Ver</button>
+            <button data-id="${g.id}" class="secondary poll-results-btn">🗳️ Anket Sonuçları</button>
+            <button data-id="${g.id}" class="secondary edit-gameinfo-btn">📖 Oyun Bilgisi</button>
+            <button data-id="${g.id}" class="secondary cover-photo-btn">🖼️ Kapak Fotoğrafı</button>
+            <button data-id="${g.id}" class="danger delete-game">Sil</button>
+          </div>
+        </div>
+        <h3 style="margin:0.3rem 0;"><a href="oyun-detay.html?id=${g.id}">${escapeHtml(title)}</a></h3>
+        ${g.description ? `<p class="muted">${escapeHtml(g.description)}</p>` : ''}
+        <ol>
+          ${sorted.map(r => `<li>${escapeHtml(r.player_name)} — ${r.points} puan</li>`).join('')}
+        </ol>
+        ${awarded.length ? `<p class="muted">${awarded.map(a => `${escapeHtml(a.badges?.icon || '🏅')} ${escapeHtml(a.badges?.name || '')}: ${escapeHtml(a.player_name)}`).join(' · ')}</p>` : ''}
+        ${g.highlights ? `<p>${escapeHtml(g.highlights)}</p>` : ''}
+        ${(g.game_images || []).map(img => `<img class="post-image" src="${img.image_url}" alt="">`).join('')}
+        <div class="badge-award-form" id="badge-award-form-${g.id}" style="display:none; margin-top:1rem;"></div>
+        <div class="poll-results-panel" id="poll-results-${g.id}" style="display:none; margin-top:1rem;"></div>
+        <div class="edit-gameinfo-form" id="edit-gameinfo-form-${g.id}" style="display:none; margin-top:1rem;">
+          <label>Oyun Bilgisi — oyunun kendi sayfasında, kapak fotoğrafının altında öne çıkan şekilde gösterilir</label>
+          <textarea class="edit-gameinfo-textarea" placeholder="Bu oyunun kısa bir anlatısı ya da öne çıkan notu...">${escapeHtml(g.info_text || '')}</textarea>
+          <button class="edit-gameinfo-save-btn" data-id="${g.id}">Kaydet</button>
+          <div class="edit-gameinfo-msg"></div>
+        </div>
+        <div class="cover-photo-form" id="cover-photo-form-${g.id}" style="display:none; margin-top:1rem;">
+          ${g.cover_image_url ? `<img class="post-image" src="${g.cover_image_url}" style="max-height:160px;" alt="">` : '<p class="muted">Henüz kapak fotoğrafı yok.</p>'}
+          <input type="file" class="cover-photo-file" accept="image/*">
+          <button class="cover-photo-save-btn" data-id="${g.id}">Yükle</button>
+          ${g.cover_image_url ? `<button type="button" class="secondary cover-photo-remove-btn" data-id="${g.id}">Kaldır</button>` : ''}
+          <div class="cover-photo-msg"></div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  document.querySelectorAll('.poll-results-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const game = games.find(x => x.id === btn.dataset.id);
+      togglePollResults(game);
+    });
+  });
+
+  document.querySelectorAll('.edit-gameinfo-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const formEl = document.getElementById(`edit-gameinfo-form-${btn.dataset.id}`);
+      formEl.style.display = formEl.style.display === 'block' ? 'none' : 'block';
+    });
+  });
+
+  document.querySelectorAll('.edit-gameinfo-save-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const gameId = btn.dataset.id;
+      const formEl = document.getElementById(`edit-gameinfo-form-${gameId}`);
+      const msgEl = formEl.querySelector('.edit-gameinfo-msg');
+      const text = formEl.querySelector('.edit-gameinfo-textarea').value.trim();
+
+      const { error: updErr } = await supabaseClient.from('games').update({ info_text: text || null }).eq('id', gameId);
+      if (updErr) {
+        msgEl.textContent = 'Kaydedilemedi: ' + updErr.message;
+        msgEl.className = 'error';
+        return;
+      }
+
+      loadManageList();
+    });
+  });
+
+  document.querySelectorAll('.award-badges-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const game = games.find(x => x.id === btn.dataset.id);
+      toggleBadgeAwardForm(game);
+    });
+  });
+
+  document.querySelectorAll('.cover-photo-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const formEl = document.getElementById(`cover-photo-form-${btn.dataset.id}`);
+      formEl.style.display = formEl.style.display === 'block' ? 'none' : 'block';
+    });
+  });
+
+  document.querySelectorAll('.cover-photo-save-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const gameId = btn.dataset.id;
+      const formEl = document.getElementById(`cover-photo-form-${gameId}`);
+      const msgEl = formEl.querySelector('.cover-photo-msg');
+      const fileInput = formEl.querySelector('.cover-photo-file');
+      const file = fileInput.files[0];
+
+      if (!file) {
+        msgEl.textContent = 'Önce bir fotoğraf seç.';
+        msgEl.className = 'error';
+        return;
+      }
+
+      msgEl.textContent = 'Yükleniyor...';
+      msgEl.className = 'muted';
+
+      const path = `${gameId}/cover_${Date.now()}_${file.name.replace(/[^a-zA-Z0-9_.-]/g, '_')}`;
+      const { error: upErr } = await supabaseClient.storage.from('game-images').upload(path, file);
+      if (upErr) {
+        msgEl.textContent = 'Yüklenemedi: ' + upErr.message;
+        msgEl.className = 'error';
+        return;
+      }
+
+      const { data: pub } = supabaseClient.storage.from('game-images').getPublicUrl(path);
+      const { error: updErr } = await supabaseClient.from('games').update({ cover_image_url: pub.publicUrl }).eq('id', gameId);
+      if (updErr) {
+        msgEl.textContent = 'Kaydedilemedi: ' + updErr.message;
+        msgEl.className = 'error';
+        return;
+      }
+
+      loadManageList();
+    });
+  });
+
+  document.querySelectorAll('.cover-photo-remove-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      await supabaseClient.from('games').update({ cover_image_url: null }).eq('id', btn.dataset.id);
+      loadManageList();
+    });
+  });
+
+  document.querySelectorAll('.delete-game').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!confirm('Bu oyun silinsin mi?')) return;
+      await supabaseClient.from('games').delete().eq('id', btn.dataset.id);
+      loadManageList();
+    });
+  });
+
+  document.querySelectorAll('.toggle-ranked').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const newRanked = btn.dataset.ranked !== 'true';
+      await supabaseClient.from('games').update({ ranked: newRanked }).eq('id', btn.dataset.id);
+      loadInProgressList();
+      loadManageList();
+    });
+  });
+}
+
+async function togglePollResults(game) {
+  const panel = document.getElementById(`poll-results-${game.id}`);
+  const opening = panel.style.display !== 'block';
+
+  if (!opening) {
+    panel.style.display = 'none';
+    return;
+  }
+
+  panel.innerHTML = `<p class="muted">Yükleniyor...</p>`;
+  panel.style.display = 'block';
+
+  const { data: votes, error } = await supabaseClient
+    .from('game_poll_votes')
+    .select('voter_id, deserved_win, player_name, created_at')
+    .eq('game_id', game.id)
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    panel.innerHTML = `<p class="error">Anket sonuçları yüklenemedi.</p>`;
+    return;
+  }
+
+  let tableHtml = `<p class="muted">Henüz oy yok.</p>`;
+
+  if (votes && votes.length > 0) {
+    const voterIds = votes.map(v => v.voter_id);
+    const { data: profiles } = await supabaseClient
+      .from('profiles')
+      .select('id, username, player_name')
+      .in('id', voterIds);
+    const profileMap = {};
+    (profiles || []).forEach(p => { profileMap[p.id] = p; });
+
+    tableHtml = `
+      <table>
+        <thead><tr><th>Oy Veren</th><th>Kazanan Hak Etti mi?</th><th>MVP Oyu</th></tr></thead>
+        <tbody>
+          ${votes.map(v => {
+            const profile = profileMap[v.voter_id];
+            const voterLabel = profile ? escapeHtml(profile.player_name || profile.username) : 'Bilinmiyor';
+            return `<tr><td>${voterLabel}</td><td>${v.deserved_win ? 'Evet' : 'Hayır'}</td><td>${escapeHtml(v.player_name || '—')}</td></tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    `;
+  }
+
+  panel.innerHTML = `
+    ${tableHtml}
+    <button type="button" class="secondary toggle-poll-closed-btn" data-id="${game.id}" data-closed="${game.poll_closed}">${game.poll_closed ? 'Anketi Aç' : 'Anketi Kapat'}</button>
+  `;
+
+  panel.querySelector('.toggle-poll-closed-btn').addEventListener('click', async () => {
+    const newClosed = panel.querySelector('.toggle-poll-closed-btn').dataset.closed !== 'true';
+    await supabaseClient.from('games').update({ poll_closed: newClosed }).eq('id', game.id);
+    loadManageList();
+  });
+}
+
+function toggleBadgeAwardForm(game) {
+  const formEl = document.getElementById(`badge-award-form-${game.id}`);
+  const opening = formEl.style.display !== 'block';
+
+  if (!opening) {
+    formEl.style.display = 'none';
+    return;
+  }
+
+  const participants = (game.results || []).map(r => r.player_name);
+  const existing = {};
+  (game.game_badges || []).forEach(a => { existing[a.badge_id] = a.player_name; });
+
+  if (badgesCache.length === 0) {
+    formEl.innerHTML = `<p class="muted">Henüz tanımlı rozet yok. Önce yukarıdaki Rozetler panelinden bir tane oluştur.</p>`;
+  } else {
+    formEl.innerHTML = badgesCache.map(b => `
+      <label>${escapeHtml(b.icon || '🏅')} ${escapeHtml(b.name)}${b.points ? ` (${b.points > 0 ? '+' : ''}${formatPoints(b.points)} puan)` : ''}</label>
+      <select class="badge-award-select" data-badge-id="${b.id}">
+        <option value="">— Kimse —</option>
+        ${participants.map(p => `<option value="${escapeHtml(p)}"${existing[b.id] === p ? ' selected' : ''}>${escapeHtml(p)}</option>`).join('')}
+      </select>
+    `).join('') + `
+      <button class="save-badges-btn" data-id="${game.id}">Rozetleri Kaydet</button>
+      <div class="badge-award-msg"></div>
+    `;
+
+    formEl.querySelector('.save-badges-btn').addEventListener('click', () => saveBadgeAwards(game.id, formEl));
+  }
+
+  formEl.style.display = 'block';
+}
+
+async function saveBadgeAwards(gameId, formEl) {
+  const msgEl = formEl.querySelector('.badge-award-msg');
+  msgEl.textContent = 'Kaydediliyor...';
+  msgEl.className = 'muted';
+
+  const selects = formEl.querySelectorAll('.badge-award-select');
+
+  for (const sel of selects) {
+    const badgeId = sel.dataset.badgeId;
+    const playerName = sel.value;
+
+    if (playerName) {
+      const { error } = await supabaseClient
+        .from('game_badges')
+        .upsert({ game_id: gameId, badge_id: badgeId, player_name: playerName }, { onConflict: 'game_id,badge_id' });
+      if (error) {
+        msgEl.textContent = 'Kaydedilemedi: ' + error.message;
+        msgEl.className = 'error';
+        return;
+      }
+    } else {
+      await supabaseClient.from('game_badges').delete().eq('game_id', gameId).eq('badge_id', badgeId);
+    }
+  }
+
+  msgEl.textContent = 'Rozetler kaydedildi.';
+  msgEl.className = 'success';
+  loadManageList();
+}
+
+async function loadBadgesCache() {
+  const { data: badges, error } = await supabaseClient
+    .from('badges')
+    .select('id, name, icon, points, description')
+    .order('created_at', { ascending: true });
+
+  if (!error) {
+    badgesCache = badges || [];
+  }
+}
+
+function badgeRowHtml(b) {
+  return `
+    <div class="member-row" id="badge-view-${b.id}">
+      <div class="member-info">
+        <strong>${escapeHtml(b.icon || '🏅')} ${escapeHtml(b.name)}</strong>
+        <span class="pill">${b.points > 0 ? '+' : ''}${formatPoints(b.points)} puan</span>
+      </div>
+      <div class="card-actions">
+        <button class="secondary edit-badge-btn" data-id="${b.id}">Düzenle</button>
+        <button class="danger delete-badge-btn" data-id="${b.id}">Sil</button>
+      </div>
+    </div>
+    ${b.description ? `<p class="muted" style="margin:0 0 0.6rem;">${escapeHtml(b.description)}</p>` : ''}
+    <div class="badge-edit-form" id="badge-edit-${b.id}" style="display:none; margin-bottom:1rem;">
+      <label>Ad</label>
+      <input type="text" class="edit-badge-name" value="${escapeHtml(b.name)}">
+      <label>İkon (emoji)</label>
+      <input type="text" class="edit-badge-icon" value="${escapeHtml(b.icon || '')}" maxlength="4">
+      <label>Bonus Puan</label>
+      <input type="number" class="edit-badge-points" value="${b.points}" step="0.5">
+      <label>Açıklama</label>
+      <textarea class="edit-badge-description">${escapeHtml(b.description || '')}</textarea>
+      <button class="edit-badge-save-btn" data-id="${b.id}">Kaydet</button>
+      <button type="button" class="secondary edit-badge-cancel-btn" data-id="${b.id}">Vazgeç</button>
+      <div class="edit-badge-msg"></div>
+    </div>
+  `;
+}
+
+function loadBadgesList() {
+  const listEl = document.getElementById('badges-list');
+
+  if (badgesCache.length === 0) {
+    listEl.innerHTML = `<p class="muted">Henüz tanımlı rozet yok.</p>`;
+    return;
+  }
+
+  listEl.innerHTML = badgesCache.map(badgeRowHtml).join('');
+
+  document.querySelectorAll('.edit-badge-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById(`badge-edit-${btn.dataset.id}`).style.display = 'block';
+    });
+  });
+
+  document.querySelectorAll('.edit-badge-cancel-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById(`badge-edit-${btn.dataset.id}`).style.display = 'none';
+    });
+  });
+
+  document.querySelectorAll('.edit-badge-save-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const id = btn.dataset.id;
+      const formEl = document.getElementById(`badge-edit-${id}`);
+      const msgEl = formEl.querySelector('.edit-badge-msg');
+      const name = formEl.querySelector('.edit-badge-name').value.trim();
+      const icon = formEl.querySelector('.edit-badge-icon').value.trim();
+      const points = parseFloat(formEl.querySelector('.edit-badge-points').value) || 0;
+      const description = formEl.querySelector('.edit-badge-description').value.trim();
+
+      if (!name) {
+        msgEl.textContent = 'Rozete bir ad ver.';
+        msgEl.className = 'error';
+        return;
+      }
+
+      const { error } = await supabaseClient
+        .from('badges')
+        .update({ name, icon: icon || null, points, description: description || null })
+        .eq('id', id);
+
+      if (error) {
+        msgEl.textContent = 'Güncellenemedi: ' + error.message;
+        msgEl.className = 'error';
+        return;
+      }
+
+      await loadBadgesCache();
+      loadBadgesList();
+    });
+  });
+
+  document.querySelectorAll('.delete-badge-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!confirm('Bu rozet tamamen silinsin mi? Daha önce verilmiş olanlar da kaldırılır.')) return;
+      await supabaseClient.from('badges').delete().eq('id', btn.dataset.id);
+      await loadBadgesCache();
+      loadBadgesList();
+      loadManageList();
+    });
+  });
+}
+
+document.getElementById('badge-create-btn').addEventListener('click', async () => {
+  const msgEl = document.getElementById('badge-create-msg');
+  msgEl.textContent = '';
+  msgEl.className = '';
+
+  const name = document.getElementById('badge-name').value.trim();
+  const icon = document.getElementById('badge-icon').value.trim();
+  const points = parseFloat(document.getElementById('badge-points').value) || 0;
+  const description = document.getElementById('badge-description').value.trim();
+
+  if (!name) {
+    msgEl.textContent = 'Rozete bir ad ver.';
+    msgEl.className = 'error';
+    return;
+  }
+
+  const { error } = await supabaseClient.from('badges').insert({
+    name, icon: icon || null, points, description: description || null
+  });
+
+  if (error) {
+    msgEl.textContent = 'Oluşturulamadı: ' + error.message;
+    msgEl.className = 'error';
+    return;
+  }
+
+  msgEl.textContent = 'Rozet oluşturuldu!';
+  msgEl.className = 'success';
+  document.getElementById('badge-name').value = '';
+  document.getElementById('badge-icon').value = '';
+  document.getElementById('badge-points').value = '0';
+  document.getElementById('badge-description').value = '';
+  await loadBadgesCache();
+  loadBadgesList();
+});
+
+async function loadMembers() {
+  const listEl = document.getElementById('members-list');
+
+  const { data: members, error } = await supabaseClient
+    .from('profiles')
+    .select('id, username, is_admin, player_name')
+    .order('username', { ascending: true });
+
+  if (error) {
+    listEl.innerHTML = `<p class="error">Üyeler yüklenemedi.</p>`;
+    console.error(error);
+    return;
+  }
+
+  if (!members || members.length === 0) {
+    listEl.innerHTML = `<p class="muted">Henüz üye yok.</p>`;
+    return;
+  }
+
+  listEl.innerHTML = members.map(m => `
+    <div class="member-row">
+      <div class="member-info">
+        <strong>${escapeHtml(m.username)}</strong>
+        ${m.is_admin ? '<span class="pill">Yönetici</span>' : ''}
+      </div>
+      <div class="member-link">
+        <label style="margin:0;">Şeref Listesi Bağlantısı</label>
+        <select class="member-player-select" data-id="${m.id}">
+          <option value="">— Bağlantı Yok —</option>
+          ${ROSTER.map(name => `<option value="${name}"${m.player_name === name ? ' selected' : ''}>${name}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+  `).join('');
+
+  document.querySelectorAll('.member-player-select').forEach(sel => {
+    sel.addEventListener('change', async () => {
+      const msgEl = document.getElementById('members-msg');
+      msgEl.textContent = '';
+      msgEl.className = '';
+
+      const { error: updErr } = await supabaseClient
+        .from('profiles')
+        .update({ player_name: sel.value || null })
+        .eq('id', sel.dataset.id);
+
+      if (updErr) {
+        msgEl.textContent = 'Güncellenemedi: ' + updErr.message;
+        msgEl.className = 'error';
+        return;
+      }
+
+      msgEl.textContent = 'Bağlantı güncellendi.';
+      msgEl.className = 'success';
+    });
+  });
+}
+
+function formatPoints(n) {
+  n = Number(n);
+  return Number.isInteger(n) ? String(n) : n.toFixed(1);
+}
+
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+</script>
+
+</body>
+</html>

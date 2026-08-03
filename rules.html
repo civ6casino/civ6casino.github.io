@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kurallar — Civ 6 Şeref Listesi</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div class="header-left">
+    <div id="auth-widget" class="auth-widget"></div>
+    <h1>🏛️ Civ 6 Şeref Listesi</h1>
+  </div>
+  <nav>
+    <a href="index.html">Şeref Listesi</a>
+    <a href="oyun-tarihi.html">Oyun Tarihi</a>
+    <a href="rules.html" class="active">Kurallar</a>
+    <a href="playlist.html">Çalma Listesi</a>
+    <a href="admin.html">Yönetim</a>
+  </nav>
+</header>
+
+<div class="hero-banner">
+  <div class="hero-emblem">
+    <svg class="laurel laurel-left" viewBox="0 0 40 70" xmlns="http://www.w3.org/2000/svg">
+      <path d="M20 68 C 10 55, 8 40, 14 20 C 17 10, 20 4, 20 2" fill="none" stroke="var(--accent-dim)" stroke-width="1.3"/>
+      <g fill="var(--accent-dim)">
+        <ellipse cx="12" cy="58" rx="4" ry="9" transform="rotate(-35 12 58)"/>
+        <ellipse cx="9" cy="46" rx="4" ry="9" transform="rotate(-40 9 46)"/>
+        <ellipse cx="10" cy="34" rx="3.6" ry="8" transform="rotate(-30 10 34)"/>
+        <ellipse cx="13" cy="23" rx="3.2" ry="7" transform="rotate(-25 13 23)"/>
+        <ellipse cx="17" cy="13" rx="2.6" ry="6" transform="rotate(-18 17 13)"/>
+      </g>
+    </svg>
+    <div class="crest">📜</div>
+    <svg class="laurel laurel-right" viewBox="0 0 40 70" xmlns="http://www.w3.org/2000/svg">
+      <path d="M20 68 C 10 55, 8 40, 14 20 C 17 10, 20 4, 20 2" fill="none" stroke="var(--accent-dim)" stroke-width="1.3"/>
+      <g fill="var(--accent-dim)">
+        <ellipse cx="12" cy="58" rx="4" ry="9" transform="rotate(-35 12 58)"/>
+        <ellipse cx="9" cy="46" rx="4" ry="9" transform="rotate(-40 9 46)"/>
+        <ellipse cx="10" cy="34" rx="3.6" ry="8" transform="rotate(-30 10 34)"/>
+        <ellipse cx="13" cy="23" rx="3.2" ry="7" transform="rotate(-25 13 23)"/>
+        <ellipse cx="17" cy="13" rx="2.6" ry="6" transform="rotate(-18 17 13)"/>
+      </g>
+    </svg>
+  </div>
+  <h1>Kanunlar Kodeksi</h1>
+  <p>Şanın kendisiyle ölçüldüğü kutsal kanunlar.</p>
+</div>
+
+<main>
+  <section class="panel">
+    <h2>⚖️ Puanlama Kuralları</h2>
+    <p class="muted">Puanlar, her oyunun sonunda elde edilen nihai sıralamaya göre verilir. Sıralama şu şekilde belirlenir:</p>
+    <ul class="house-rules">
+      <li><strong>1. sırayı</strong>, oyunda zafer koşulunu sağlayan oyuncu alır. Bu oyuncunun oyun içi skorunun yüksekliğinin bir önemi yoktur, zaferi kazanmış olması yeterlidir.</li>
+      <li>Kalan oyuncuların sıralaması, oyunun bitişindeki <strong>oyun içi skorlarına</strong> göre belirlenir: en yüksek skora sahip oyuncu 2. sırayı, bir sonraki en yüksek skora sahip oyuncu 3. sırayı alır ve bu şekilde devam eder.</li>
+      <li>Ancak oyun sırasında <strong>elenen</strong> oyuncular bu skor sıralamasının dışında tutulur. Elenen oyuncular, hayatta kalan tüm oyunculardan sonra sıralanır ve kendi aralarındaki sıralama <strong>elenme sırasına</strong> göre belirlenir: en son elenen oyuncu, elenenler arasında en iyi sırayı alır; ilk elenen oyuncu ise en düşük sırada yer alır.</li>
+    </ul>
+    <table>
+      <thead><tr><th>Sıra</th><th>Puan</th></tr></thead>
+      <tbody>
+        <tr><td>1. sıra</td><td>7</td></tr>
+        <tr><td>2. sıra</td><td>3</td></tr>
+        <tr><td>3. sıra</td><td>3</td></tr>
+        <tr><td>4. sıra</td><td>2</td></tr>
+        <tr><td>5. sıra</td><td>1</td></tr>
+        <tr><td>6. sıra</td><td>1</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="panel">
+    <h2>🏅 Rozet Kuralları</h2>
+    <p class="muted">Bir oyun tamamlandıktan sonra, o oyundaki öne çıkan performanslara özel rozetler verilebilir. Her rozetin bonus puanı, rozeti alan oyuncunun Şeref Listesi'ndeki toplamına doğrudan eklenir. Bir rozet tek bir oyunda en fazla bir oyuncuya verilebilir. Oyuncuların kazandığı tüm rozetler kendi profil sayfalarında ve Oyun Tarihi'ndeki ilgili oyunun altında listelenir.</p>
+    <ul class="house-rules" id="badges-rules-list">
+      <li class="muted">Yükleniyor...</li>
+    </ul>
+  </section>
+
+  <section class="panel">
+    <h2>🏺 Özel Kurallar</h2>
+    <ul class="house-rules">
+      <li>Oyuncular kendi kurdukları şehirleri diğer oyunculara veremezler.</li>
+      <li>Oyuncular başka bir oyuncuya kasıtlı olarak birinciliği salamaz.</li>
+      <li>Savaşta olmayan bir oyuncu, halihazırda bir savaşı sabote etmek için birimlerini geçiş engellemek amacıyla kullanamaz.</li>
+      <li>Sözlü ateşkes anlaşmasına iki taraf da uymakla yükümlüdür.</li>
+      <li>Taraflardan talep eden olursa savaş başlangıcında tarafsız bir millet pause atar.</li>
+      <li>Tur süresinin son anlarını, rakibin hamle yapmasını engellemek veya onu zamana sıkıştırmak amacıyla kullanmak yasaktır.</li>
+    </ul>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="auth.js"></script>
+<script>
+async function loadBadgeRules() {
+  const listEl = document.getElementById('badges-rules-list');
+
+  const { data: badges, error } = await supabaseClient
+    .from('badges')
+    .select('name, icon, points, description')
+    .order('points', { ascending: false });
+
+  if (error) {
+    listEl.innerHTML = `<li class="error">Rozetler yüklenemedi.</li>`;
+    console.error(error);
+    return;
+  }
+
+  if (!badges || badges.length === 0) {
+    listEl.innerHTML = `<li class="muted">Henüz tanımlı rozet yok.</li>`;
+    return;
+  }
+
+  listEl.innerHTML = badges.map(b => `
+    <li>
+      <strong>${escapeHtml(b.icon || '🏅')} ${escapeHtml(b.name)}</strong>
+      ${b.points ? ` (${b.points > 0 ? '+' : ''}${formatPoints(b.points)} puan)` : ''}
+      ${b.description ? ` — ${escapeHtml(b.description)}` : ''}
+    </li>
+  `).join('');
+}
+
+function formatPoints(n) {
+  n = Number(n);
+  return Number.isInteger(n) ? String(n) : n.toFixed(1);
+}
+
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+loadBadgeRules();
+</script>
+</body>
+</html>

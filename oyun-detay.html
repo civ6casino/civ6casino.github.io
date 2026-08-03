@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oyun Detayı — Civ 6 Şeref Listesi</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div class="header-left">
+    <div id="auth-widget" class="auth-widget"></div>
+    <h1>🏛️ Civ 6 Şeref Listesi</h1>
+  </div>
+  <nav>
+    <a href="index.html">Şeref Listesi</a>
+    <a href="oyun-tarihi.html">Oyun Tarihi</a>
+    <a href="rules.html">Kurallar</a>
+    <a href="playlist.html">Çalma Listesi</a>
+    <a href="admin.html">Yönetim</a>
+  </nav>
+</header>
+
+<div class="hero-banner" id="hero-banner">
+  <div class="hero-emblem">
+    <svg class="laurel laurel-left" viewBox="0 0 40 70" xmlns="http://www.w3.org/2000/svg">
+      <path d="M20 68 C 10 55, 8 40, 14 20 C 17 10, 20 4, 20 2" fill="none" stroke="var(--accent-dim)" stroke-width="1.3"/>
+      <g fill="var(--accent-dim)">
+        <ellipse cx="12" cy="58" rx="4" ry="9" transform="rotate(-35 12 58)"/>
+        <ellipse cx="9" cy="46" rx="4" ry="9" transform="rotate(-40 9 46)"/>
+        <ellipse cx="10" cy="34" rx="3.6" ry="8" transform="rotate(-30 10 34)"/>
+        <ellipse cx="13" cy="23" rx="3.2" ry="7" transform="rotate(-25 13 23)"/>
+        <ellipse cx="17" cy="13" rx="2.6" ry="6" transform="rotate(-18 17 13)"/>
+      </g>
+    </svg>
+    <div class="crest">🗺️</div>
+    <svg class="laurel laurel-right" viewBox="0 0 40 70" xmlns="http://www.w3.org/2000/svg">
+      <path d="M20 68 C 10 55, 8 40, 14 20 C 17 10, 20 4, 20 2" fill="none" stroke="var(--accent-dim)" stroke-width="1.3"/>
+      <g fill="var(--accent-dim)">
+        <ellipse cx="12" cy="58" rx="4" ry="9" transform="rotate(-35 12 58)"/>
+        <ellipse cx="9" cy="46" rx="4" ry="9" transform="rotate(-40 9 46)"/>
+        <ellipse cx="10" cy="34" rx="3.6" ry="8" transform="rotate(-30 10 34)"/>
+        <ellipse cx="13" cy="23" rx="3.2" ry="7" transform="rotate(-25 13 23)"/>
+        <ellipse cx="17" cy="13" rx="2.6" ry="6" transform="rotate(-18 17 13)"/>
+      </g>
+    </svg>
+  </div>
+  <h1 id="game-title-heading">Yükleniyor...</h1>
+  <p id="game-subtitle" class="muted"></p>
+</div>
+
+<main>
+  <img id="cover-photo-display" class="cover-photo-box" style="display:none;" alt="">
+
+  <section class="panel" id="gameinfo-panel" style="display:none;">
+    <p id="gameinfo-lede" class="lede"></p>
+  </section>
+
+  <section class="panel" id="info-panel">
+    <h2>📜 Genel Bilgi</h2>
+    <div id="game-info" class="muted">Yükleniyor...</div>
+  </section>
+
+  <section class="panel" id="gallery-panel" style="display:none;">
+    <h2>🖼️ Fotoğraflar</h2>
+    <div id="gallery-list"></div>
+  </section>
+
+  <section class="panel" id="poll-panel" style="display:none;">
+    <h2>🗳️ Anket</h2>
+    <div id="poll-body"></div>
+  </section>
+
+  <section class="panel" id="compose-panel" style="display:none;">
+    <h2>✍️ Bu Oyun Hakkında Yaz</h2>
+    <label for="post-title">Başlık</label>
+    <input type="text" id="post-title" placeholder="örn. Persepolis'in Düşüşü">
+    <label for="post-body">Hikaye</label>
+    <textarea id="post-body" placeholder="Hikayeni anlat... İmleci istediğin yere koyup 'Resim Ekle' ile araya fotoğraf serpiştirebilirsin." style="min-height:200px;"></textarea>
+    <div class="checkbox-row" style="margin-top:0.6rem;">
+      <button type="button" id="post-image-insert-btn" class="secondary">🖼️ Resim Ekle</button>
+      <input type="file" id="post-image-insert-file" accept="image/*" style="display:none;">
+      <span id="post-image-status" class="muted"></span>
+    </div>
+    <label for="post-audio">🔊 Sesli Özet (isteğe bağlı)</label>
+    <input type="file" id="post-audio" accept="audio/*">
+    <div class="checkbox-row">
+      <input type="checkbox" id="post-anonymous">
+      <label for="post-anonymous">Anonim olarak paylaş</label>
+    </div>
+    <button id="post-submit-btn">Kaydı Yayınla</button>
+    <div id="post-msg"></div>
+  </section>
+
+  <section class="panel" id="login-hint">
+    <p class="muted">Bu oyun hakkında yazmak için üst köşedeki <strong>Giriş Yap</strong> düğmesini kullan.</p>
+  </section>
+
+  <section class="panel">
+    <h2>📖 Bu Oyunun Vakayinamesi</h2>
+    <div id="posts-list" class="muted">Yükleniyor...</div>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="auth.js"></script>
+<script>
+const params = new URLSearchParams(location.search);
+const gameId = params.get('id') || '';
+const composePanel = document.getElementById('compose-panel');
+const loginHint = document.getElementById('login-hint');
+
+Civ6Auth.onChange(() => {
+  const loggedIn = !!(Civ6Auth.currentUser && Civ6Auth.currentUsername);
+  composePanel.style.display = loggedIn ? 'block' : 'none';
+  loginHint.style.display = loggedIn ? 'none' : 'block';
+  loadPosts();
+  loadPoll();
+});
+
+function insertAtCursor(textarea, text) {
+  const start = textarea.selectionStart;
+  const end = textarea.selectionEnd;
+  const before = textarea.value.slice(0, start);
+  const after = textarea.value.slice(end);
+  textarea.value = before + text + after;
+  const cursorPos = start + text.length;
+  textarea.focus();
+  textarea.setSelectionRange(cursorPos, cursorPos);
+}
+
+async function uploadPostImage(file) {
+  const path = `${Civ6Auth.currentUser.id}/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9_.-]/g, '_')}`;
+  const { error: uploadErr } = await supabaseClient.storage.from('blog-images').upload(path, file);
+  if (uploadErr) throw uploadErr;
+  const { data: publicUrlData } = supabaseClient.storage.from('blog-images').getPublicUrl(path);
+  return publicUrlData.publicUrl;
+}
+
+async function uploadPostAudio(file) {
+  const path = `${Civ6Auth.currentUser.id}/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9_.-]/g, '_')}`;
+  const { error: uploadErr } = await supabaseClient.storage.from('blog-audio').upload(path, file);
+  if (uploadErr) throw uploadErr;
+  const { data: publicUrlData } = supabaseClient.storage.from('blog-audio').getPublicUrl(path);
+  return publicUrlData.publicUrl;
+}
+
+function excerptOf(body, maxLen = 180) {
+  const plain = (body || '')
+    .split('\n')
+    .filter(line => !line.trim().match(/^!\[\]\(\S+\)$/))
+    .join(' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (plain.length <= maxLen) return plain;
+  return plain.slice(0, maxLen).trim() + '…';
+}
+
+document.getElementById('post-image-insert-btn').addEventListener('click', () => {
+  document.getElementById('post-image-insert-file').click();
+});
+
+document.getElementById('post-image-insert-file').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const statusEl = document.getElementById('post-image-status');
+  statusEl.textContent = 'Resim yükleniyor...';
+  statusEl.className = 'muted';
+  try {
+    const url = await uploadPostImage(file);
+    insertAtCursor(document.getElementById('post-body'), `\n![](${url})\n`);
+    statusEl.textContent = 'Resim eklendi.';
+    statusEl.className = 'success';
+  } catch (err) {
+    statusEl.textContent = 'Resim yüklenemedi: ' + err.message;
+    statusEl.className = 'error';
+  }
+  e.target.value = '';
+});
+
+document.getElementById('post-submit-btn').addEventListener('click', async () => {
+  const msgEl = document.getElementById('post-msg');
+  msgEl.textContent = '';
+  msgEl.className = '';
+
+  if (!Civ6Auth.currentUser || !Civ6Auth.currentUsername) {
+    msgEl.textContent = 'Yazmak için giriş yapmalısın.';
+    msgEl.className = 'error';
+    return;
+  }
+
+  const title = document.getElementById('post-title').value.trim();
+  const body = document.getElementById('post-body').value.trim();
+  const isAnonymous = document.getElementById('post-anonymous').checked;
+  const audioInput = document.getElementById('post-audio');
+  const audioFile = audioInput.files[0];
+
+  if (!title || !body) {
+    msgEl.textContent = 'Lütfen bir başlık ve biraz hikaye metni ekle.';
+    msgEl.className = 'error';
+    return;
+  }
+
+  let audioUrl = null;
+  if (audioFile) {
+    try {
+      audioUrl = await uploadPostAudio(audioFile);
+    } catch (err) {
+      msgEl.textContent = 'Sesli özet yüklenemedi: ' + err.message;
+      msgEl.className = 'error';
+      return;
+    }
+  }
+
+  const { error: insertErr } = await supabaseClient.from('posts').insert({
+    author_id: Civ6Auth.currentUser.id,
+    author_name: Civ6Auth.currentUsername,
+    is_anonymous: isAnonymous,
+    title,
+    body,
+    game_id: gameId,
+    audio_url: audioUrl
+  });
+
+  if (insertErr) {
+    msgEl.textContent = 'Yayınlama başarısız oldu: ' + insertErr.message;
+    msgEl.className = 'error';
+    return;
+  }
+
+  msgEl.textContent = 'Kayıt yayınlandı!';
+  msgEl.className = 'success';
+  document.getElementById('post-title').value = '';
+  document.getElementById('post-body').value = '';
+  document.getElementById('post-anonymous').checked = false;
+  audioInput.value = '';
+  loadPosts();
+});
+
+async function loadPosts() {
+  const listEl = document.getElementById('posts-list');
+  if (!gameId) return;
+
+  const { data: posts, error } = await supabaseClient
+    .from('posts')
+    .select('id, title, body, author_name, is_anonymous, author_id, created_at, comments(id)')
+    .eq('game_id', gameId)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    listEl.innerHTML = `<p class="error">Yazılar yüklenemedi.</p>`;
+    console.error(error);
+    return;
+  }
+
+  if (!posts || posts.length === 0) {
+    listEl.innerHTML = `<p class="muted">Bu oyuna bağlı bir yazı yok. İlk yazan sen ol!</p>`;
+    return;
+  }
+
+  listEl.innerHTML = posts.map(p => {
+    const displayName = p.is_anonymous ? 'Anonim Vakanüvis' : escapeHtml(p.author_name || 'Bilinmiyor');
+    const date = new Date(p.created_at).toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' });
+    const canDelete = Civ6Auth.currentUser && (p.author_id === Civ6Auth.currentUser.id || Civ6Auth.isAdmin);
+    const commentCount = (p.comments || []).length;
+
+    return `
+      <div class="post-card-compact">
+        ${canDelete ? `<div class="card-actions"><button type="button" class="danger delete-post" data-id="${p.id}">Sil</button></div>` : ''}
+        <h3><a href="yazi.html?id=${p.id}">${escapeHtml(p.title)}</a></h3>
+        <div class="post-meta">${displayName} tarafından · ${date} <a class="pill" href="yazi.html?id=${p.id}">💬 ${commentCount} yanıt</a></div>
+        <p class="post-excerpt">${escapeHtml(excerptOf(p.body))}</p>
+      </div>
+    `;
+  }).join('');
+
+  listEl.querySelectorAll('.delete-post').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!confirm('Bu yazı silinsin mi?')) return;
+      await supabaseClient.from('posts').delete().eq('id', btn.dataset.id);
+      loadPosts();
+    });
+  });
+}
+
+async function loadGame() {
+  const infoEl = document.getElementById('game-info');
+
+  if (!gameId) {
+    document.getElementById('game-title-heading').textContent = 'Oyun Bulunamadı';
+    infoEl.innerHTML = `<p class="error">Bir oyun belirtilmedi.</p>`;
+    return;
+  }
+
+  const { data: g, error } = await supabaseClient
+    .from('games')
+    .select('id, played_on, name, description, info_text, highlights, note, status, ranked, poll_closed, cover_image_url, results(player_name, rank, points), game_images(image_url), game_badges(player_name, badges(name, icon, points))')
+    .eq('id', gameId)
+    .maybeSingle();
+
+  if (error || !g) {
+    document.getElementById('game-title-heading').textContent = 'Oyun Bulunamadı';
+    infoEl.innerHTML = `<p class="error">Bu oyun yüklenemedi ya da mevcut değil.</p>`;
+    console.error(error);
+    return;
+  }
+
+  currentGame = g;
+
+  const title = g.name || g.note || `${g.played_on} tarihli oyun`;
+  document.getElementById('game-title-heading').textContent = title;
+
+  if (g.info_text) {
+    document.getElementById('gameinfo-panel').style.display = 'block';
+    document.getElementById('gameinfo-lede').textContent = g.info_text;
+  }
+
+  const statusText = g.status === 'completed' ? 'Tamamlandı' : 'Devam Ediyor';
+  const rankedText = g.ranked ? 'Dereceli' : 'Derecesiz';
+  document.getElementById('game-subtitle').textContent = `${g.played_on} · ${statusText} · ${rankedText}`;
+
+  if (g.cover_image_url) {
+    const coverEl = document.getElementById('cover-photo-display');
+    coverEl.src = g.cover_image_url;
+    coverEl.style.display = 'block';
+  }
+
+  const sortedResults = (g.results || []).slice().sort((a, b) => a.rank - b.rank);
+  const awardedBadges = (g.game_badges || []).filter(a => a.badges);
+
+  infoEl.innerHTML = `
+    ${g.description ? `<p>${escapeHtml(g.description)}</p>` : ''}
+    ${sortedResults.length ? `<ol>${sortedResults.map(r => `<li>${escapeHtml(r.player_name)} — ${r.points} puan</li>`).join('')}</ol>` : '<p class="muted">Henüz sonuç girilmedi.</p>'}
+    ${awardedBadges.length ? `
+      <p class="muted">${awardedBadges.map(a => `${escapeHtml(a.badges.icon || '🏅')} <a href="profil.html?oyuncu=${encodeURIComponent(a.player_name)}">${escapeHtml(a.player_name)}</a>: ${escapeHtml(a.badges.name)}${a.badges.points ? ` (${a.badges.points > 0 ? '+' : ''}${formatPoints(a.badges.points)} puan)` : ''}`).join(' · ')}</p>
+    ` : ''}
+    ${g.highlights ? `<p class="post-body">${escapeHtml(g.highlights)}</p>` : ''}
+  `;
+
+  const images = g.game_images || [];
+  if (images.length > 0) {
+    document.getElementById('gallery-panel').style.display = 'block';
+    document.getElementById('gallery-list').innerHTML = images.map(img => `<img class="post-image" src="${img.image_url}" alt="">`).join('');
+  }
+
+  await loadPoll();
+}
+
+const ROSTER = ['Yusuf', 'Eren', 'Arda', 'Alperen', 'Taha', 'Ayaz'];
+let currentGame = null;
+
+async function loadPoll() {
+  const panel = document.getElementById('poll-panel');
+  const bodyEl = document.getElementById('poll-body');
+  const g = currentGame;
+  if (!g) return;
+
+  const winner = (g.results || []).find(r => r.rank === 1);
+  if (!winner || g.status !== 'completed') {
+    panel.style.display = 'none';
+    return;
+  }
+
+  panel.style.display = 'block';
+
+  if (g.poll_closed) {
+    bodyEl.innerHTML = `<p class="muted">Bu oyunun anketi kapatıldı.</p>`;
+    return;
+  }
+
+  if (!Civ6Auth.currentUser) {
+    bodyEl.innerHTML = `<p class="muted">Oy vermek için üst köşedeki <strong>Giriş Yap</strong> düğmesini kullan.</p>`;
+    return;
+  }
+
+  if (!Civ6Auth.playerName) {
+    bodyEl.innerHTML = `<p class="muted">Ankete katılmak için hesabının Şeref Listesi'ndeki bir oyuncuyla bağlantılı olması gerekir. Bunun için bir yöneticiyle konuş.</p>`;
+    return;
+  }
+
+  const myName = Civ6Auth.playerName;
+  const mvpCandidates = ROSTER.filter(n => n !== myName && n !== winner.player_name);
+
+  const { data: existingVote } = await supabaseClient
+    .from('game_poll_votes')
+    .select('deserved_win, player_name')
+    .eq('game_id', g.id)
+    .eq('voter_id', Civ6Auth.currentUser.id)
+    .maybeSingle();
+
+  bodyEl.innerHTML = `
+    <p class="muted">Kazanan: <strong>${escapeHtml(winner.player_name)}</strong></p>
+    <label>Saygınlık: Kazanan bu zaferi hak etti mi?</label>
+    <div class="checkbox-row">
+      <label style="margin:0; text-transform:none;"><input type="radio" name="poll-deserved" value="yes" style="width:auto;" ${existingVote && existingVote.deserved_win === true ? 'checked' : ''}> Evet</label>
+      <label style="margin:0; text-transform:none;"><input type="radio" name="poll-deserved" value="no" style="width:auto;" ${existingVote && existingVote.deserved_win === false ? 'checked' : ''}> Hayır</label>
+    </div>
+    <label for="poll-mvp-select">Sence MVP olmayı bu oyunda kim hak etti?</label>
+    <select id="poll-mvp-select">
+      <option value="">— Seç —</option>
+      ${mvpCandidates.map(n => `<option value="${n}"${existingVote && existingVote.player_name === n ? ' selected' : ''}>${n}</option>`).join('')}
+    </select>
+    <button id="poll-submit-btn">${existingVote ? 'Oyunu Güncelle' : 'Oyla'}</button>
+    <div id="poll-msg"></div>
+  `;
+
+  document.getElementById('poll-submit-btn').addEventListener('click', async () => {
+    const msgEl = document.getElementById('poll-msg');
+    msgEl.textContent = '';
+    msgEl.className = '';
+
+    const deservedInput = document.querySelector('input[name="poll-deserved"]:checked');
+    const mvpSelect = document.getElementById('poll-mvp-select');
+
+    if (!deservedInput) {
+      msgEl.textContent = 'Lütfen bir seçim yap.';
+      msgEl.className = 'error';
+      return;
+    }
+    if (!mvpSelect.value) {
+      msgEl.textContent = 'Lütfen bir MVP seç.';
+      msgEl.className = 'error';
+      return;
+    }
+
+    const { error } = await supabaseClient
+      .from('game_poll_votes')
+      .upsert({
+        game_id: g.id,
+        voter_id: Civ6Auth.currentUser.id,
+        deserved_win: deservedInput.value === 'yes',
+        player_name: mvpSelect.value,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'game_id,voter_id' });
+
+    if (error) {
+      msgEl.textContent = 'Kaydedilemedi: ' + error.message;
+      msgEl.className = 'error';
+      return;
+    }
+
+    msgEl.textContent = 'Oyun kaydedildi!';
+    msgEl.className = 'success';
+    document.getElementById('poll-submit-btn').textContent = 'Oyunu Güncelle';
+  });
+}
+
+function formatPoints(n) {
+  n = Number(n);
+  return Number.isInteger(n) ? String(n) : n.toFixed(1);
+}
+
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+loadGame();
+loadPosts();
+</script>
+</body>
+</html>

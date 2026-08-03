@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yazı — Civ 6 Şeref Listesi</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div class="header-left">
+    <div id="auth-widget" class="auth-widget"></div>
+    <h1>🏛️ Civ 6 Şeref Listesi</h1>
+  </div>
+  <nav>
+    <a href="index.html">Şeref Listesi</a>
+    <a href="oyun-tarihi.html">Oyun Tarihi</a>
+    <a href="rules.html">Kurallar</a>
+    <a href="playlist.html">Çalma Listesi</a>
+    <a href="admin.html">Yönetim</a>
+  </nav>
+</header>
+
+<div class="hero-banner">
+  <div class="hero-emblem">
+    <svg class="laurel laurel-left" viewBox="0 0 40 70" xmlns="http://www.w3.org/2000/svg">
+      <path d="M20 68 C 10 55, 8 40, 14 20 C 17 10, 20 4, 20 2" fill="none" stroke="var(--accent-dim)" stroke-width="1.3"/>
+      <g fill="var(--accent-dim)">
+        <ellipse cx="12" cy="58" rx="4" ry="9" transform="rotate(-35 12 58)"/>
+        <ellipse cx="9" cy="46" rx="4" ry="9" transform="rotate(-40 9 46)"/>
+        <ellipse cx="10" cy="34" rx="3.6" ry="8" transform="rotate(-30 10 34)"/>
+        <ellipse cx="13" cy="23" rx="3.2" ry="7" transform="rotate(-25 13 23)"/>
+        <ellipse cx="17" cy="13" rx="2.6" ry="6" transform="rotate(-18 17 13)"/>
+      </g>
+    </svg>
+    <div class="crest">📖</div>
+    <svg class="laurel laurel-right" viewBox="0 0 40 70" xmlns="http://www.w3.org/2000/svg">
+      <path d="M20 68 C 10 55, 8 40, 14 20 C 17 10, 20 4, 20 2" fill="none" stroke="var(--accent-dim)" stroke-width="1.3"/>
+      <g fill="var(--accent-dim)">
+        <ellipse cx="12" cy="58" rx="4" ry="9" transform="rotate(-35 12 58)"/>
+        <ellipse cx="9" cy="46" rx="4" ry="9" transform="rotate(-40 9 46)"/>
+        <ellipse cx="10" cy="34" rx="3.6" ry="8" transform="rotate(-30 10 34)"/>
+        <ellipse cx="13" cy="23" rx="3.2" ry="7" transform="rotate(-25 13 23)"/>
+        <ellipse cx="17" cy="13" rx="2.6" ry="6" transform="rotate(-18 17 13)"/>
+      </g>
+    </svg>
+  </div>
+  <h1 id="post-title-heading">Yükleniyor...</h1>
+  <p id="post-subtitle" class="muted"></p>
+</div>
+
+<main>
+  <section class="panel" id="post-panel">
+    <div id="view-area">
+      <div id="post-actions" class="card-actions"></div>
+      <div id="post-audio-area"></div>
+      <div id="post-body-area" class="post-body muted">Yükleniyor...</div>
+    </div>
+    <div class="edit-form" id="edit-form" style="display:none; margin-top:1rem;">
+      <label>Başlık</label>
+      <input type="text" id="edit-title">
+      <label>Hikaye</label>
+      <textarea id="edit-body" style="min-height:200px;"></textarea>
+      <div class="checkbox-row" style="margin-top:0.6rem;">
+        <button type="button" id="edit-image-insert-btn" class="secondary">🖼️ Resim Ekle</button>
+        <input type="file" id="edit-image-insert-file" accept="image/*" style="display:none;">
+        <span id="edit-image-status" class="muted"></span>
+      </div>
+      <div id="edit-audio-existing"></div>
+      <label id="edit-audio-label">🔊 Sesli Özet Ekle (isteğe bağlı)</label>
+      <input type="file" id="edit-audio-file" accept="audio/*">
+      <div class="checkbox-row">
+        <input type="checkbox" id="edit-anonymous">
+        <label for="edit-anonymous">Anonim olarak paylaş</label>
+      </div>
+      <button id="edit-save-btn">Kaydet</button>
+      <button type="button" class="secondary" id="edit-cancel-btn">Vazgeç</button>
+      <div id="edit-msg"></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>💬 Yanıtlar</h2>
+    <div id="comments-list" class="muted">Yükleniyor...</div>
+    <div class="comment-compose" id="comment-compose" style="display:none;">
+      <textarea id="comment-body-input" maxlength="500" placeholder="Bir yanıt yaz..."></textarea>
+      <div class="checkbox-row">
+        <input type="checkbox" id="comment-anonymous-input">
+        <label for="comment-anonymous-input">Anonim olarak paylaş</label>
+      </div>
+      <button type="button" id="comment-submit-btn">Yanıtla</button>
+      <div id="comment-msg"></div>
+    </div>
+    <p id="comment-login-hint" class="muted">Yanıt yazmak için giriş yapmalısın.</p>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="auth.js"></script>
+<script>
+const params = new URLSearchParams(location.search);
+const postId = params.get('id') || '';
+let currentPost = null;
+
+function gameLabel(g) {
+  return g.name || g.played_on;
+}
+
+function insertAtCursor(textarea, text) {
+  const start = textarea.selectionStart;
+  const end = textarea.selectionEnd;
+  const before = textarea.value.slice(0, start);
+  const after = textarea.value.slice(end);
+  textarea.value = before + text + after;
+  const cursorPos = start + text.length;
+  textarea.focus();
+  textarea.setSelectionRange(cursorPos, cursorPos);
+}
+
+async function uploadPostImage(file) {
+  const path = `${Civ6Auth.currentUser.id}/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9_.-]/g, '_')}`;
+  const { error: uploadErr } = await supabaseClient.storage.from('blog-images').upload(path, file);
+  if (uploadErr) throw uploadErr;
+  const { data: publicUrlData } = supabaseClient.storage.from('blog-images').getPublicUrl(path);
+  return publicUrlData.publicUrl;
+}
+
+async function uploadPostAudio(file) {
+  const path = `${Civ6Auth.currentUser.id}/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9_.-]/g, '_')}`;
+  const { error: uploadErr } = await supabaseClient.storage.from('blog-audio').upload(path, file);
+  if (uploadErr) throw uploadErr;
+  const { data: publicUrlData } = supabaseClient.storage.from('blog-audio').getPublicUrl(path);
+  return publicUrlData.publicUrl;
+}
+
+function renderPostBody(body) {
+  const lines = (body || '').split('\n');
+  let html = '';
+  let buffer = [];
+
+  function flush() {
+    if (buffer.length) {
+      html += `<p>${buffer.map(escapeHtml).join('<br>')}</p>`;
+      buffer = [];
+    }
+  }
+
+  lines.forEach(line => {
+    const trimmed = line.trim();
+    const m = trimmed.match(/^!\[\]\((\S+)\)$/);
+    if (m) {
+      flush();
+      html += `<img class="post-image" src="${escapeHtml(m[1])}" alt="">`;
+    } else if (trimmed === '') {
+      flush();
+    } else {
+      buffer.push(line);
+    }
+  });
+  flush();
+  return html;
+}
+
+Civ6Auth.onChange(() => {
+  renderPost();
+  const loggedIn = !!(Civ6Auth.currentUser && Civ6Auth.currentUsername);
+  document.getElementById('comment-compose').style.display = loggedIn ? 'block' : 'none';
+  document.getElementById('comment-login-hint').style.display = loggedIn ? 'none' : 'block';
+});
+
+async function loadPost() {
+  if (!postId) {
+    document.getElementById('post-title-heading').textContent = 'Yazı Bulunamadı';
+    document.getElementById('post-body-area').innerHTML = `<p class="error">Bir yazı belirtilmedi.</p>`;
+    return;
+  }
+
+  const { data: p, error } = await supabaseClient
+    .from('posts')
+    .select('id, title, body, image_url, audio_url, author_name, is_anonymous, author_id, created_at, game_id, games(name, played_on)')
+    .eq('id', postId)
+    .maybeSingle();
+
+  if (error || !p) {
+    document.getElementById('post-title-heading').textContent = 'Yazı Bulunamadı';
+    document.getElementById('post-body-area').innerHTML = `<p class="error">Bu yazı yüklenemedi ya da mevcut değil.</p>`;
+    console.error(error);
+    return;
+  }
+
+  currentPost = p;
+  renderPost();
+}
+
+function renderPost() {
+  const p = currentPost;
+  if (!p) return;
+
+  document.getElementById('post-title-heading').textContent = p.title;
+
+  const displayName = p.is_anonymous ? 'Anonim Vakanüvis' : (p.author_name || 'Bilinmiyor');
+  const date = new Date(p.created_at).toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' });
+  const gameTag = p.games ? ` · 🎮 <a href="oyun-detay.html?id=${p.game_id}">${escapeHtml(gameLabel(p.games))}</a>` : '';
+  document.getElementById('post-subtitle').innerHTML = `${escapeHtml(displayName)} tarafından · ${date}${gameTag}`;
+
+  const canEdit = Civ6Auth.currentUser && (p.author_id === Civ6Auth.currentUser.id || Civ6Auth.isAdmin);
+  document.getElementById('post-actions').innerHTML = canEdit ? `
+    <button id="edit-btn">Düzenle</button>
+    <button class="danger" id="delete-btn-post">Sil</button>
+  ` : '';
+
+  if (canEdit) {
+    document.getElementById('edit-btn').addEventListener('click', toggleEditForm);
+    document.getElementById('delete-btn-post').addEventListener('click', async () => {
+      if (!confirm('Bu yazı silinsin mi?')) return;
+      await supabaseClient.from('posts').delete().eq('id', postId);
+      location.href = p.game_id ? `oyun-detay.html?id=${p.game_id}` : 'oyun-tarihi.html#vakayiname';
+    });
+  }
+
+  document.getElementById('post-audio-area').innerHTML = p.audio_url
+    ? `<audio controls src="${escapeHtml(p.audio_url)}"></audio>` : '';
+
+  const legacyImage = p.image_url ? `<img class="post-image" src="${escapeHtml(p.image_url)}" alt="">` : '';
+  document.getElementById('post-body-area').innerHTML = legacyImage + renderPostBody(p.body);
+  document.getElementById('post-body-area').className = 'post-body';
+
+  if (canEdit) {
+    document.getElementById('edit-title').value = p.title;
+    document.getElementById('edit-body').value = p.image_url ? `![](${p.image_url})\n\n${p.body}` : p.body;
+    document.getElementById('edit-anonymous').checked = p.is_anonymous;
+
+    const existingAudioEl = document.getElementById('edit-audio-existing');
+    if (p.audio_url) {
+      existingAudioEl.innerHTML = `
+        <label>Mevcut Sesli Özet</label>
+        <audio controls src="${escapeHtml(p.audio_url)}" style="width:100%;"></audio>
+        <div class="checkbox-row">
+          <input type="checkbox" id="edit-remove-audio">
+          <label for="edit-remove-audio">Sesli özeti kaldır</label>
+        </div>
+      `;
+      document.getElementById('edit-audio-label').textContent = 'Sesli Özeti Değiştir (isteğe bağlı)';
+    } else {
+      existingAudioEl.innerHTML = '';
+      document.getElementById('edit-audio-label').textContent = '🔊 Sesli Özet Ekle (isteğe bağlı)';
+    }
+  }
+}
+
+function toggleEditForm() {
+  const view = document.getElementById('view-area');
+  const form = document.getElementById('edit-form');
+  const opening = form.style.display !== 'block';
+  form.style.display = opening ? 'block' : 'none';
+  view.style.display = opening ? 'none' : 'block';
+}
+
+document.getElementById('edit-cancel-btn').addEventListener('click', toggleEditForm);
+
+document.getElementById('edit-image-insert-btn').addEventListener('click', () => {
+  document.getElementById('edit-image-insert-file').click();
+});
+
+document.getElementById('edit-image-insert-file').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const statusEl = document.getElementById('edit-image-status');
+  statusEl.textContent = 'Resim yükleniyor...';
+  statusEl.className = 'muted';
+  try {
+    const url = await uploadPostImage(file);
+    insertAtCursor(document.getElementById('edit-body'), `\n![](${url})\n`);
+    statusEl.textContent = 'Resim eklendi.';
+    statusEl.className = 'success';
+  } catch (err) {
+    statusEl.textContent = 'Resim yüklenemedi: ' + err.message;
+    statusEl.className = 'error';
+  }
+  e.target.value = '';
+});
+
+document.getElementById('edit-save-btn').addEventListener('click', async () => {
+  const msgEl = document.getElementById('edit-msg');
+  msgEl.textContent = '';
+  msgEl.className = '';
+
+  const title = document.getElementById('edit-title').value.trim();
+  const body = document.getElementById('edit-body').value.trim();
+  const isAnonymous = document.getElementById('edit-anonymous').checked;
+  const removeAudioEl = document.getElementById('edit-remove-audio');
+  const removeAudio = removeAudioEl ? removeAudioEl.checked : false;
+  const audioFile = document.getElementById('edit-audio-file').files[0];
+
+  if (!title || !body) {
+    msgEl.textContent = 'Lütfen bir başlık ve biraz hikaye metni ekle.';
+    msgEl.className = 'error';
+    return;
+  }
+
+  let audioUrl = currentPost.audio_url || null;
+
+  if (audioFile) {
+    try {
+      audioUrl = await uploadPostAudio(audioFile);
+    } catch (err) {
+      msgEl.textContent = 'Sesli özet yüklenemedi: ' + err.message;
+      msgEl.className = 'error';
+      return;
+    }
+  } else if (removeAudio) {
+    audioUrl = null;
+  }
+
+  const { error: updateErr } = await supabaseClient
+    .from('posts')
+    .update({ title, body, is_anonymous: isAnonymous, audio_url: audioUrl, image_url: null })
+    .eq('id', postId);
+
+  if (updateErr) {
+    msgEl.textContent = 'Güncellenemedi: ' + updateErr.message;
+    msgEl.className = 'error';
+    return;
+  }
+
+  await loadPost();
+  toggleEditForm();
+});
+
+async function loadComments() {
+  const listEl = document.getElementById('comments-list');
+
+  const { data: comments, error } = await supabaseClient
+    .from('comments')
+    .select('id, author_id, author_name, is_anonymous, body, created_at')
+    .eq('post_id', postId)
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    listEl.innerHTML = `<p class="error">Yanıtlar yüklenemedi.</p>`;
+    console.error(error);
+    return;
+  }
+
+  if (!comments || comments.length === 0) {
+    listEl.innerHTML = `<p class="muted">Henüz yanıt yok. İlk yazan sen ol!</p>`;
+    return;
+  }
+
+  listEl.innerHTML = comments.map(c => {
+    const displayName = c.is_anonymous ? 'Anonim Yorumcu' : escapeHtml(c.author_name || 'Bilinmiyor');
+    const date = new Date(c.created_at).toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' });
+    const canDelete = Civ6Auth.currentUser && (c.author_id === Civ6Auth.currentUser.id || Civ6Auth.isAdmin);
+    return `
+      <div class="comment-row">
+        <div class="comment-meta">
+          <strong>${displayName}</strong> <span class="muted">· ${date}</span>
+          ${canDelete ? `<button type="button" class="danger delete-comment-btn" data-id="${c.id}">Sil</button>` : ''}
+        </div>
+        <div class="comment-body">${escapeHtml(c.body)}</div>
+      </div>
+    `;
+  }).join('');
+
+  listEl.querySelectorAll('.delete-comment-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!confirm('Bu yanıt silinsin mi?')) return;
+      await supabaseClient.from('comments').delete().eq('id', btn.dataset.id);
+      loadComments();
+    });
+  });
+}
+
+document.getElementById('comment-submit-btn').addEventListener('click', async () => {
+  const msgEl = document.getElementById('comment-msg');
+  msgEl.textContent = '';
+  msgEl.className = '';
+
+  const bodyInput = document.getElementById('comment-body-input');
+  const anonInput = document.getElementById('comment-anonymous-input');
+  const body = bodyInput.value.trim();
+
+  if (!body) {
+    msgEl.textContent = 'Boş bir yanıt gönderemezsin.';
+    msgEl.className = 'error';
+    return;
+  }
+
+  const { error } = await supabaseClient.from('comments').insert({
+    post_id: postId,
+    author_id: Civ6Auth.currentUser.id,
+    author_name: Civ6Auth.currentUsername,
+    is_anonymous: anonInput.checked,
+    body
+  });
+
+  if (error) {
+    msgEl.textContent = 'Gönderilemedi: ' + error.message;
+    msgEl.className = 'error';
+    return;
+  }
+
+  bodyInput.value = '';
+  anonInput.checked = false;
+  loadComments();
+});
+
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+loadPost();
+loadComments();
+</script>
+</body>
+</html>

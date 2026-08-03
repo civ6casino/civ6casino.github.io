@@ -1,0 +1,156 @@
+/* ============================================================
+   PREMIUM ENHANCEMENT LAYER — preview build (Şeref Listesi only)
+   ------------------------------------------------------------
+   Loaded after style.css. Purely additive/override rules — does
+   not touch style.css itself, so every other page is untouched
+   until this direction is approved and merged in for real.
+
+   Signature devices for this direction:
+     1. A laurel-flanked emblem in the hero banner
+     2. Engraved gold corner brackets on every panel ("tablet" feel)
+   Everything else (texture, hover states, type) stays quiet in
+   support of those two, per the brief's "clean and minimal" ask.
+   ============================================================ */
+
+/* Sitewide-feeling but page-scoped: a faint hex-grid, like an old
+   campaign map's coordinate grid, tinted with the site's existing
+   lapis accent so it reads as "ancient chart" rather than tech UI. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='104'%3E%3Cpolygon points='30,2 56,17 56,47 30,62 4,47 4,17' fill='none' stroke='%235aa9d6' stroke-width='1' opacity='0.35'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 60px 104px;
+  opacity: 0.4;
+}
+
+/* A large, very faint compass-rose watermark behind the hero banner
+   only — the one "ancient map" moment on the page, spent in one place
+   rather than smeared across every section. */
+.hero-banner {
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-banner::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 480px;
+  height: 480px;
+  transform: translate(-50%, -50%);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cg fill='none' stroke='%23d4af5a' stroke-width='0.6'%3E%3Ccircle cx='100' cy='100' r='90'/%3E%3Ccircle cx='100' cy='100' r='60'/%3E%3Cpath d='M100 6 L100 194 M6 100 L194 100 M27 27 L173 173 M173 27 L27 173'/%3E%3C/g%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  opacity: 0.07;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hero-banner > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Laurel-flanked ceremonial emblem, replacing the bare crest emoji */
+.hero-emblem {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+}
+
+.hero-emblem .laurel {
+  width: 32px;
+  height: 56px;
+  opacity: 0.8;
+  flex-shrink: 0;
+}
+
+.hero-emblem .laurel-right {
+  transform: scaleX(-1);
+}
+
+.hero-emblem .crest {
+  font-size: 2.6rem;
+  filter: drop-shadow(0 0 14px var(--gold-glow));
+}
+
+/* Engraved gold corner brackets on every panel — the "monument
+   tablet" signature. Layered behind the existing top accent line
+   (.panel::before), which is untouched. */
+.panel {
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cpath d='M2,22 L2,8 Q2,2 8,2 L22,2' stroke='%23d4af5a' stroke-width='1.4' fill='none' opacity='0.55'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cpath d='M24,4 L24,18 Q24,24 18,24 L4,24' stroke='%23d4af5a' stroke-width='1.4' fill='none' opacity='0.55'/%3E%3C/svg%3E"),
+    linear-gradient(180deg, var(--panel2), var(--panel));
+  background-repeat: no-repeat, no-repeat, no-repeat;
+  background-position: top 8px left 8px, bottom 8px right 8px, 0 0;
+  background-size: 26px 26px, 26px 26px, 100% 100%;
+}
+
+/* Slightly richer panel shadow — a raised stone-tablet feel */
+.panel {
+  box-shadow: 0 10px 28px rgba(0,0,0,0.32), inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+/* Refined button relief + hover glow (extends, doesn't replace, the
+   existing button rules) */
+button:hover {
+  filter: brightness(1.06);
+}
+
+button.secondary:hover {
+  background: rgba(212,175,90,0.07);
+}
+
+/* Nav link underline-grow on hover/active, replacing the flatter
+   background-highlight-only treatment */
+nav a {
+  position: relative;
+}
+
+nav a::after {
+  content: "";
+  position: absolute;
+  left: 0.9rem;
+  right: 0.9rem;
+  bottom: 0.32rem;
+  height: 1px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.2s ease;
+}
+
+nav a:hover::after,
+nav a.active::after {
+  transform: scaleX(1);
+}
+
+/* Leaderboard row hover feedback */
+.lb-row {
+  transition: background 0.15s ease;
+}
+
+.lb-row:hover {
+  background: rgba(212,175,90,0.05);
+}
+
+/* A small floral-leaf tick beside top-3 ranks — a quiet echo of the
+   laurel motif, not a repeat of the full wreath */
+.lb-row.rank-1 .lb-rank::before,
+.lb-row.rank-2 .lb-rank::before,
+.lb-row.rank-3 .lb-rank::before {
+  content: "❧ ";
+  opacity: 0.65;
+}
+
+/* Slightly more generous panel heading rhythm */
+h2 {
+  margin-bottom: 1.1rem;
+}
