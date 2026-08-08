@@ -342,8 +342,40 @@ async function loadArchive() {
           ${it.video_url ? `<a class="pill" href="${escapeHtml(it.video_url)}" target="_blank" rel="noopener">▶️ Videoyu İzle</a>` : ''}
           ${it.audio_url ? `<audio controls src="${escapeHtml(it.audio_url)}"></audio>` : ''}
           <div class="archive-date">${date}</div>
-          ${Civ6Auth.isAdmin ? `<div class="card-actions"><button class="danger delete-archive" data-id="${it.id}">Sil</button></div>` : ''}
+          ${Civ6Auth.isAdmin ? `<div class="card-actions"><button type="button" class="secondary edit-archive-btn" data-id="${it.id}">Düzenle</button><button class="danger delete-archive" data-id="${it.id}">Sil</button></div>` : ''}
         </div>
+        ${Civ6Auth.isAdmin ? `
+          <div class="archive-edit-form" id="archive-edit-${it.id}" style="display:none;">
+            <label>Bağlam / Kısa Hikaye</label>
+            <textarea class="edit-archive-caption">${escapeHtml(it.caption || '')}</textarea>
+            <label>Video Bağlantısı</label>
+            <input type="text" class="edit-archive-video" value="${escapeHtml(it.video_url || '')}">
+
+            ${it.image_url ? `
+              <img class="post-image" src="${escapeHtml(it.image_url)}" style="max-height:160px;" alt="">
+              <div class="checkbox-row">
+                <input type="checkbox" class="edit-archive-remove-image" id="rm-archive-img-${it.id}">
+                <label for="rm-archive-img-${it.id}">Fotoğrafı kaldır</label>
+              </div>
+            ` : ''}
+            <label>${it.image_url ? 'Fotoğrafı Değiştir' : 'Fotoğraf Ekle'} (isteğe bağlı)</label>
+            <input type="file" class="edit-archive-image-file" accept="image/*">
+
+            ${it.audio_url ? `
+              <audio controls src="${escapeHtml(it.audio_url)}" style="width:100%;"></audio>
+              <div class="checkbox-row">
+                <input type="checkbox" class="edit-archive-remove-audio" id="rm-archive-audio-${it.id}">
+                <label for="rm-archive-audio-${it.id}">Ses kaydını kaldır</label>
+              </div>
+            ` : ''}
+            <label>${it.audio_url ? 'Ses Kaydını Değiştir' : '🔊 Ses Kaydı Ekle'} (isteğe bağlı)</label>
+            <input type="file" class="edit-archive-audio-file" accept="audio/*">
+
+            <button class="edit-archive-save-btn" data-id="${it.id}">Kaydet</button>
+            <button type="button" class="secondary edit-archive-cancel-btn" data-id="${it.id}">Vazgeç</button>
+            <div class="edit-archive-msg"></div>
+          </div>
+        ` : ''}
       </div>
     `;
   }).join('');
@@ -352,6 +384,96 @@ async function loadArchive() {
     btn.addEventListener('click', async () => {
       if (!confirm('Bu arşiv öğesi silinsin mi?')) return;
       await supabaseClient.from('archive_items').delete().eq('id', btn.dataset.id);
+      loadArchive();
+    });
+  });
+
+  document.querySelectorAll('.edit-archive-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const formEl = document.getElementById(`archive-edit-${btn.dataset.id}`);
+      formEl.style.display = formEl.style.display === 'block' ? 'none' : 'block';
+    });
+  });
+
+  document.querySelectorAll('.edit-archive-cancel-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById(`archive-edit-${btn.dataset.id}`).style.display = 'none';
+    });
+  });
+
+  document.querySelectorAll('.edit-archive-save-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const itemId = btn.dataset.id;
+      const formEl = document.getElementById(`archive-edit-${itemId}`);
+      const msgEl = formEl.querySelector('.edit-archive-msg');
+      msgEl.textContent = '';
+      msgEl.className = '';
+
+      const caption = formEl.querySelector('.edit-archive-caption').value.trim();
+      const videoUrl = formEl.querySelector('.edit-archive-video').value.trim();
+
+      const removeImageEl = formEl.querySelector('.edit-archive-remove-image');
+      const removeImage = removeImageEl ? removeImageEl.checked : false;
+      const imageFile = formEl.querySelector('.edit-archive-image-file').files[0];
+
+      const removeAudioEl = formEl.querySelector('.edit-archive-remove-audio');
+      const removeAudio = removeAudioEl ? removeAudioEl.checked : false;
+      const audioFile = formEl.querySelector('.edit-archive-audio-file').files[0];
+
+      const currentItem = items.find(x => x.id === itemId);
+      let imageUrl = currentItem.image_url || null;
+      let audioUrl = currentItem.audio_url || null;
+
+      if (imageFile) {
+        const path = `${Civ6Auth.currentUser.id}/${Date.now()}_${imageFile.name.replace(/[^a-zA-Z0-9_.-]/g, '_')}`;
+        const { error: upErr } = await supabaseClient.storage.from('archive-images').upload(path, imageFile);
+        if (upErr) {
+          msgEl.textContent = 'Fotoğraf yüklenemedi: ' + upErr.message;
+          msgEl.className = 'error';
+          return;
+        }
+        const { data: pub } = supabaseClient.storage.from('archive-images').getPublicUrl(path);
+        imageUrl = pub.publicUrl;
+      } else if (removeImage) {
+        imageUrl = null;
+      }
+
+      if (audioFile) {
+        const audioPath = `${Civ6Auth.currentUser.id}/${Date.now()}_${audioFile.name.replace(/[^a-zA-Z0-9_.-]/g, '_')}`;
+        const { error: audioErr } = await supabaseClient.storage.from('blog-audio').upload(audioPath, audioFile);
+        if (audioErr) {
+          msgEl.textContent = 'Ses kaydı yüklenemedi: ' + audioErr.message;
+          msgEl.className = 'error';
+          return;
+        }
+        const { data: audioPub } = supabaseClient.storage.from('blog-audio').getPublicUrl(audioPath);
+        audioUrl = audioPub.publicUrl;
+      } else if (removeAudio) {
+        audioUrl = null;
+      }
+
+      if (!imageUrl && !videoUrl && !caption && !audioUrl) {
+        msgEl.textContent = 'En az bir fotoğraf, video bağlantısı, hikaye ya da ses kaydı kalmalı.';
+        msgEl.className = 'error';
+        return;
+      }
+
+      const { error: updErr } = await supabaseClient
+        .from('archive_items')
+        .update({
+          caption: caption || null,
+          video_url: videoUrl || null,
+          image_url: imageUrl,
+          audio_url: audioUrl
+        })
+        .eq('id', itemId);
+
+      if (updErr) {
+        msgEl.textContent = 'Kaydedilemedi: ' + updErr.message;
+        msgEl.className = 'error';
+        return;
+      }
+
       loadArchive();
     });
   });

@@ -685,6 +685,11 @@ button.danger {
   gap: 0.5rem;
 }
 
+.archive-card .archive-edit-form {
+  padding: 0.8rem 0.9rem 1rem;
+  border-top: 1px dashed var(--border);
+}
+
 .archive-card .archive-caption {
   font-size: 0.92rem;
   line-height: 1.5;
