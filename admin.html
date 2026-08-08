@@ -939,6 +939,16 @@ async function loadMembers() {
           ${ROSTER.map(name => `<option value="${name}"${m.player_name === name ? ' selected' : ''}>${name}</option>`).join('')}
         </select>
       </div>
+      <div class="card-actions">
+        <button type="button" class="secondary reset-password-btn" data-id="${m.id}" data-username="${escapeHtml(m.username)}">🔑 Şifre Sıfırla</button>
+      </div>
+    </div>
+    <div class="reset-password-form" id="reset-password-form-${m.id}" style="display:none;">
+      <label>${escapeHtml(m.username)} için yeni şifre (en az 6 karakter)</label>
+      <input type="password" class="reset-password-input" placeholder="Yeni şifre">
+      <button class="reset-password-save-btn" data-id="${m.id}">Şifreyi Kaydet</button>
+      <button type="button" class="secondary reset-password-cancel-btn" data-id="${m.id}">Vazgeç</button>
+      <div class="reset-password-msg"></div>
     </div>
   `).join('');
 
@@ -961,6 +971,53 @@ async function loadMembers() {
 
       msgEl.textContent = 'Bağlantı güncellendi.';
       msgEl.className = 'success';
+    });
+  });
+
+  document.querySelectorAll('.reset-password-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const formEl = document.getElementById(`reset-password-form-${btn.dataset.id}`);
+      formEl.style.display = formEl.style.display === 'block' ? 'none' : 'block';
+    });
+  });
+
+  document.querySelectorAll('.reset-password-cancel-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById(`reset-password-form-${btn.dataset.id}`).style.display = 'none';
+    });
+  });
+
+  document.querySelectorAll('.reset-password-save-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const userId = btn.dataset.id;
+      const formEl = document.getElementById(`reset-password-form-${userId}`);
+      const msgEl = formEl.querySelector('.reset-password-msg');
+      const input = formEl.querySelector('.reset-password-input');
+      const newPassword = input.value;
+
+      msgEl.textContent = '';
+      msgEl.className = '';
+
+      if (!newPassword || newPassword.length < 6) {
+        msgEl.textContent = 'Şifre en az 6 karakter olmalı.';
+        msgEl.className = 'error';
+        return;
+      }
+
+      const { error: rpcErr } = await supabaseClient.rpc('admin_reset_password', {
+        target_user_id: userId,
+        new_password: newPassword
+      });
+
+      if (rpcErr) {
+        msgEl.textContent = 'Sıfırlanamadı: ' + rpcErr.message;
+        msgEl.className = 'error';
+        return;
+      }
+
+      msgEl.textContent = 'Şifre güncellendi. Yeni şifreyi üyeyle paylaşabilirsin.';
+      msgEl.className = 'success';
+      input.value = '';
     });
   });
 }

@@ -863,7 +863,16 @@ button.danger {
   border-bottom: 1px solid var(--border);
 }
 
+.reset-password-form {
+  padding: 0 0 0.8rem;
+  border-bottom: 1px solid var(--border);
+}
+
 .member-row:last-child {
+  border-bottom: none;
+}
+
+.reset-password-form:last-child {
   border-bottom: none;
 }
 
