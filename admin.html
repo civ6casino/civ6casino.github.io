@@ -111,6 +111,12 @@
     <div id="badge-create-msg"></div>
   </section>
 
+  <section class="panel" id="pending-panel" style="display:none;">
+    <h2>🕒 Onay Bekleyen Hesaplar</h2>
+    <p class="muted">Yeni oluşturulan hesaplar buraya düşer ve onaylanana kadar siteyi kullanamaz.</p>
+    <div id="pending-list" class="muted">Yükleniyor...</div>
+  </section>
+
   <section class="panel" id="members-panel" style="display:none;">
     <h2>👥 Üyeler</h2>
     <p class="muted">Bir üyeyi Şeref Listesi'ndeki bir oyuncuyla eşleştirirsen, o oyuncunun profil sayfasında bu üyenin adı görünür.</p>
@@ -133,6 +139,7 @@ const newGamePanel = document.getElementById('new-game-panel');
 const inProgressPanel = document.getElementById('in-progress-panel');
 const managePanel = document.getElementById('manage-panel');
 const badgesPanel = document.getElementById('badges-panel');
+const pendingPanel = document.getElementById('pending-panel');
 const membersPanel = document.getElementById('members-panel');
 
 let badgesCache = [];
@@ -151,6 +158,7 @@ Civ6Auth.onChange(() => {
   inProgressPanel.style.display = showAdmin ? 'block' : 'none';
   managePanel.style.display = showAdmin ? 'block' : 'none';
   badgesPanel.style.display = showAdmin ? 'block' : 'none';
+  pendingPanel.style.display = showAdmin ? 'block' : 'none';
   membersPanel.style.display = showAdmin ? 'block' : 'none';
 
   if (showAdmin) {
@@ -159,6 +167,7 @@ Civ6Auth.onChange(() => {
       loadManageList();
       loadBadgesList();
     });
+    loadPending();
     loadMembers();
   }
 });
@@ -907,12 +916,68 @@ document.getElementById('badge-create-btn').addEventListener('click', async () =
   loadBadgesList();
 });
 
+async function loadPending() {
+  const listEl = document.getElementById('pending-list');
+
+  const { data: pending, error } = await supabaseClient
+    .from('profiles')
+    .select('id, username')
+    .eq('approved', false)
+    .order('username', { ascending: true });
+
+  if (error) {
+    listEl.innerHTML = `<p class="error">Onay bekleyenler yüklenemedi.</p>`;
+    console.error(error);
+    return;
+  }
+
+  if (!pending || pending.length === 0) {
+    listEl.innerHTML = `<p class="muted">Onay bekleyen hesap yok.</p>`;
+    return;
+  }
+
+  listEl.innerHTML = pending.map(p => `
+    <div class="member-row">
+      <div class="member-info"><strong>${escapeHtml(p.username)}</strong></div>
+      <div class="card-actions">
+        <button type="button" class="approve-account-btn" data-id="${p.id}">Onayla</button>
+        <button type="button" class="danger reject-account-btn" data-id="${p.id}" data-username="${escapeHtml(p.username)}">Reddet</button>
+      </div>
+    </div>
+  `).join('');
+
+  document.querySelectorAll('.approve-account-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const { error: updErr } = await supabaseClient.from('profiles').update({ approved: true }).eq('id', btn.dataset.id);
+      if (updErr) {
+        alert('Onaylanamadı: ' + updErr.message);
+        return;
+      }
+      loadPending();
+      loadMembers();
+    });
+  });
+
+  document.querySelectorAll('.reject-account-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!confirm(`${btn.dataset.username} hesabı reddedilip tamamen silinsin mi?`)) return;
+      const { error: rpcErr } = await supabaseClient.rpc('admin_delete_account', { target_user_id: btn.dataset.id });
+      if (rpcErr) {
+        alert('Silinemedi: ' + rpcErr.message);
+        return;
+      }
+      loadPending();
+    });
+  });
+}
+
 async function loadMembers() {
   const listEl = document.getElementById('members-list');
 
   const { data: members, error } = await supabaseClient
     .from('profiles')
     .select('id, username, is_admin, player_name')
+    .eq('approved', true)
     .order('username', { ascending: true });
 
   if (error) {
@@ -941,6 +1006,7 @@ async function loadMembers() {
       </div>
       <div class="card-actions">
         <button type="button" class="secondary reset-password-btn" data-id="${m.id}" data-username="${escapeHtml(m.username)}">🔑 Şifre Sıfırla</button>
+        <button type="button" class="danger delete-account-btn" data-id="${m.id}" data-username="${escapeHtml(m.username)}">Hesabı Sil</button>
       </div>
     </div>
     <div class="reset-password-form" id="reset-password-form-${m.id}" style="display:none;">
@@ -978,6 +1044,18 @@ async function loadMembers() {
     btn.addEventListener('click', () => {
       const formEl = document.getElementById(`reset-password-form-${btn.dataset.id}`);
       formEl.style.display = formEl.style.display === 'block' ? 'none' : 'block';
+    });
+  });
+
+  document.querySelectorAll('.delete-account-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!confirm(`${btn.dataset.username} hesabı tamamen silinsin mi? Bu geri alınamaz. (Oyun geçmişi ve yazıları kalır, sadece hesap ve girişleri silinir.)`)) return;
+      const { error: rpcErr } = await supabaseClient.rpc('admin_delete_account', { target_user_id: btn.dataset.id });
+      if (rpcErr) {
+        alert('Silinemedi: ' + rpcErr.message);
+        return;
+      }
+      loadMembers();
     });
   });
 

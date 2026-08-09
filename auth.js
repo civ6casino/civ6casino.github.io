@@ -9,6 +9,7 @@ const EMAIL_DOMAIN = 'civ6players.local';
 const Civ6Auth = (() => {
   let currentUser = null;
   let currentUsername = null;
+  let pendingUsername = null;
   let isAdmin = false;
   let playerName = null;
   let dropdownOpen = false;
@@ -32,6 +33,7 @@ const Civ6Auth = (() => {
     if (!session) {
       currentUser = null;
       currentUsername = null;
+      pendingUsername = null;
       isAdmin = false;
       playerName = null;
       renderWidget();
@@ -43,16 +45,23 @@ const Civ6Auth = (() => {
 
     const { data: profile } = await supabaseClient
       .from('profiles')
-      .select('username, is_admin, player_name')
+      .select('username, is_admin, player_name, approved')
       .eq('id', currentUser.id)
       .maybeSingle();
 
     if (!profile) {
       currentUsername = null;
+      pendingUsername = null;
+      isAdmin = false;
+      playerName = null;
+    } else if (!profile.approved) {
+      currentUsername = null;
+      pendingUsername = profile.username;
       isAdmin = false;
       playerName = null;
     } else {
       currentUsername = profile.username;
+      pendingUsername = null;
       isAdmin = !!profile.is_admin;
       playerName = profile.player_name || null;
     }
@@ -125,6 +134,15 @@ const Civ6Auth = (() => {
           location.href = `profil.html?oyuncu=${encodeURIComponent(playerName)}`;
         });
       }
+      document.getElementById('logout-btn').addEventListener('click', logout);
+    } else if (currentUser && pendingUsername) {
+      el.innerHTML = `
+        <button type="button" class="auth-btn" id="auth-toggle-btn">⏳ ${escapeHtml(pendingUsername)} ▾</button>
+        <div class="auth-dropdown" id="auth-dropdown" style="display:${dropdownOpen ? 'block' : 'none'};">
+          <p class="muted" style="margin-top:0;">Hesabın (<strong>${escapeHtml(pendingUsername)}</strong>) bir yöneticinin onayını bekliyor. Onaylandığında normal şekilde giriş yapabileceksin.</p>
+          <button type="button" class="secondary" id="logout-btn">Çıkış Yap</button>
+        </div>
+      `;
       document.getElementById('logout-btn').addEventListener('click', logout);
     } else if (currentUser && !currentUsername) {
       el.innerHTML = `
@@ -270,6 +288,7 @@ const Civ6Auth = (() => {
     logout,
     get currentUser() { return currentUser; },
     get currentUsername() { return currentUsername; },
+    get pendingUsername() { return pendingUsername; },
     get isAdmin() { return isAdmin; },
     get playerName() { return playerName; },
   };
