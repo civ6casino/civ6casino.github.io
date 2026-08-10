@@ -51,6 +51,15 @@ body::before {
   opacity: 0.4;
 }
 
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.35) 100%);
+}
+
 h1, h2, h3, nav a, button, .brand {
   font-family: "Cinzel", "Georgia", serif;
 }
@@ -134,10 +143,11 @@ main {
   background-image:
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cpath d='M2,22 L2,8 Q2,2 8,2 L22,2' stroke='%23d4af5a' stroke-width='1.4' fill='none' opacity='0.55'/%3E%3C/svg%3E"),
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cpath d='M24,4 L24,18 Q24,24 18,24 L4,24' stroke='%23d4af5a' stroke-width='1.4' fill='none' opacity='0.55'/%3E%3C/svg%3E"),
+    radial-gradient(ellipse at center, transparent 45%, rgba(20,14,4,0.22) 100%),
     linear-gradient(180deg, var(--panel2), var(--panel));
-  background-repeat: no-repeat, no-repeat, no-repeat;
-  background-position: top 8px left 8px, bottom 8px right 8px, 0 0;
-  background-size: 26px 26px, 26px 26px, 100% 100%;
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat;
+  background-position: top 8px left 8px, bottom 8px right 8px, 0 0, 0 0;
+  background-size: 26px 26px, 26px 26px, 100% 100%, 100% 100%;
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 1.6rem 1.7rem;
@@ -222,6 +232,12 @@ tr.rank-3 td:nth-child(2) { color: var(--bronze); font-weight: 700; }
   margin-bottom: 0;
   position: relative;
   overflow: hidden;
+}
+
+.hero-banner.hero-photo {
+  background-size: cover;
+  background-position: center;
+  padding: 3.4rem 1rem 3rem;
 }
 
 .cover-photo-box {
