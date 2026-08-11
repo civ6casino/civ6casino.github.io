@@ -128,7 +128,7 @@ nav a:hover, nav a.active {
 
 main {
   max-width: 900px;
-  margin: -210px auto 0;
+  margin: -300px auto 0;
   padding: 2.2rem 1.5rem 4rem;
   position: relative;
   z-index: 1;
@@ -136,7 +136,7 @@ main {
 
 @media (max-width: 560px) {
   main {
-    margin-top: -110px;
+    margin-top: -160px;
   }
 }
 
@@ -260,24 +260,26 @@ tr.rank-3 td:nth-child(2) { color: var(--bronze); font-weight: 700; }
   opacity: 1;
   background-image: none;
   /* A tight vignette keeps the title legible without veiling the whole photo.
-     The darkening ramps up gradually over a long stretch, then settles onto
-     var(--panel2) — the panel's own top color — well before the overlapping
-     panel actually begins (see main's negative margin below), so there's a
-     wide plateau of matching flat color rather than a sudden drop to black. */
+     The fade settles on plain var(--bg) — the same flat background every
+     panel on the site already sits on — rather than trying to hue-match the
+     panel's own top edge, which has its own vignette/glow layered on top and
+     is never quite a flat color to match against. Finishes well before the
+     overlapping content starts (see main's negative margin below), leaving a
+     wide solid buffer instead of a sudden drop. */
   background:
     radial-gradient(ellipse 640px 320px at center 22%, rgba(10, 12, 17, 0.6), transparent 68%),
     linear-gradient(
       to bottom,
       rgba(17, 21, 28, 0.05) 0%,
-      rgba(17, 21, 28, 0.04) 18%,
-      rgba(17, 21, 28, 0.08) 32%,
-      rgba(17, 21, 28, 0.16) 45%,
-      rgba(17, 21, 28, 0.3) 55%,
-      rgba(17, 21, 28, 0.48) 64%,
-      rgba(17, 21, 28, 0.68) 72%,
-      rgba(28, 35, 47, 0.85) 80%,
-      var(--panel2) 88%,
-      var(--panel2) 100%
+      rgba(17, 21, 28, 0.04) 15%,
+      rgba(17, 21, 28, 0.07) 28%,
+      rgba(17, 21, 28, 0.13) 38%,
+      rgba(17, 21, 28, 0.22) 46%,
+      rgba(17, 21, 28, 0.34) 54%,
+      rgba(17, 21, 28, 0.48) 61%,
+      rgba(17, 21, 28, 0.62) 67%,
+      var(--bg) 72%,
+      var(--bg) 100%
     );
 }
 
