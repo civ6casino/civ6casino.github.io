@@ -237,11 +237,34 @@ tr.rank-3 td:nth-child(2) { color: var(--bronze); font-weight: 700; }
 .hero-banner.hero-photo {
   background-size: cover;
   background-position: center;
-  min-height: 460px;
+  min-height: 620px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   padding: 2rem 1rem;
+}
+
+.hero-banner.hero-photo::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: auto;
+  height: auto;
+  transform: none;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 1;
+  background-image: none;
+  background: linear-gradient(
+    to bottom,
+    rgba(17, 21, 28, 0.6) 0%,
+    rgba(17, 21, 28, 0.58) 40%,
+    rgba(17, 21, 28, 0.82) 65%,
+    var(--bg) 100%
+  );
 }
 
 .hero-banner.hero-photo::after {
@@ -250,12 +273,23 @@ tr.rank-3 td:nth-child(2) { color: var(--bronze); font-weight: 700; }
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  background: linear-gradient(
-    to bottom,
-    rgba(17, 21, 28, 0.5) 0%,
-    rgba(17, 21, 28, 0.62) 55%,
-    var(--bg) 100%
-  );
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='104'%3E%3Cpolygon points='30,2 56,17 56,47 30,62 4,47 4,17' fill='none' stroke='%235aa9d6' stroke-width='1' opacity='0.5'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 60px 104px;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, transparent 45%, black 85%);
+  mask-image: linear-gradient(to bottom, transparent 0%, transparent 45%, black 85%);
+}
+
+.hero-banner.hero-photo h1,
+.hero-banner.hero-photo p,
+.hero-banner.hero-photo .crest {
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.95), 0 0 34px rgba(0, 0, 0, 0.7);
+}
+
+@media (max-width: 560px) {
+  .hero-banner.hero-photo {
+    min-height: 400px;
+  }
 }
 
 .cover-photo-box {
