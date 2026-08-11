@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Cinzel+Decorative:wght@700&family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Cinzel+Decorative:wght@700&display=swap');
 
 :root {
   --bg: #11151c;
@@ -8,12 +8,6 @@
   --accent: #d4af5a;
   --accent-dim: #8a6f3a;
   --accent2: #5aa9d6;
-
-  /* Type scale: gold serif is reserved for display headings (h1/h2/h3,
-     the hero title); everything else — body copy, table cells, form
-     fields, nav, buttons — uses the sans-serif UI face. */
-  --font-display: "Cinzel", "Georgia", serif;
-  --font-body: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
 
   /* Text color scale, three deliberate steps of brightness:
      heading (brightest, near-white) > body (mid-gray) > muted (dimmest, metadata). */
@@ -35,7 +29,7 @@ html, body {
 }
 
 body {
-  font-family: var(--font-body);
+  font-family: "Cormorant Garamond", "Georgia", "Times New Roman", serif;
   background:
     radial-gradient(circle at 15% 0%, rgba(90, 169, 214, 0.08), transparent 45%),
     radial-gradient(circle at 85% 10%, rgba(212, 175, 90, 0.10), transparent 40%),
@@ -59,14 +53,8 @@ body::after {
   background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.35) 100%);
 }
 
-h1, h2, h3, .brand {
-  font-family: var(--font-display);
-  color: var(--text-heading);
-}
-
-nav a, button {
-  font-family: var(--font-body);
-  font-weight: 600;
+h1, h2, h3, nav a, button, .brand {
+  font-family: "Cinzel", "Georgia", serif;
 }
 
 header {
@@ -101,7 +89,7 @@ header h1 {
 
 nav a {
   position: relative;
-  color: var(--text-heading);
+  color: var(--text);
   text-decoration: none;
   margin-left: 1rem;
   padding: 0.45rem 0.9rem;
@@ -216,7 +204,7 @@ th {
   text-transform: uppercase;
   font-size: 0.72rem;
   letter-spacing: 0.08em;
-  font-family: var(--font-body);
+  font-family: "Cinzel", serif;
 }
 
 /* Leaderboard rank styling */
@@ -272,22 +260,24 @@ tr.rank-3 td:nth-child(2) { color: var(--bronze); font-weight: 700; }
   opacity: 1;
   background-image: none;
   /* A tight vignette keeps the title legible without veiling the whole photo.
-     The fade lands on var(--panel2) — the panel's own top color — rather than
-     the page background, so wherever the overlapping panel starts (see main's
-     negative margin below) it's meeting a tone that already matches it, with
-     no seam. A final step back to var(--bg) near the very bottom covers any
-     sliver of hero left exposed past the panel's edges. */
+     The darkening ramps up gradually over a long stretch, then settles onto
+     var(--panel2) — the panel's own top color — well before the overlapping
+     panel actually begins (see main's negative margin below), so there's a
+     wide plateau of matching flat color rather than a sudden drop to black. */
   background:
     radial-gradient(ellipse 640px 320px at center 22%, rgba(10, 12, 17, 0.6), transparent 68%),
     linear-gradient(
       to bottom,
-      rgba(17, 21, 28, 0.08) 0%,
-      rgba(17, 21, 28, 0.06) 22%,
-      rgba(17, 21, 28, 0.12) 42%,
-      rgba(17, 21, 28, 0.5) 58%,
-      var(--panel2) 70%,
-      var(--panel2) 92%,
-      var(--bg) 100%
+      rgba(17, 21, 28, 0.05) 0%,
+      rgba(17, 21, 28, 0.04) 18%,
+      rgba(17, 21, 28, 0.08) 32%,
+      rgba(17, 21, 28, 0.16) 45%,
+      rgba(17, 21, 28, 0.3) 55%,
+      rgba(17, 21, 28, 0.48) 64%,
+      rgba(17, 21, 28, 0.68) 72%,
+      rgba(28, 35, 47, 0.85) 80%,
+      var(--panel2) 88%,
+      var(--panel2) 100%
     );
 }
 
@@ -345,8 +335,8 @@ tr.rank-3 td:nth-child(2) { color: var(--bronze); font-weight: 700; }
 }
 
 .hero-emblem .laurel {
-  width: 40px;
-  height: 70px;
+  width: 36px;
+  height: 62px;
   opacity: 0.8;
   flex-shrink: 0;
 }
@@ -356,15 +346,15 @@ tr.rank-3 td:nth-child(2) { color: var(--bronze); font-weight: 700; }
 }
 
 .hero-banner .crest {
-  font-size: 3.2rem;
+  font-size: 2.8rem;
   filter: drop-shadow(0 0 14px var(--gold-glow));
 }
 
 .hero-banner h1 {
-  font-size: clamp(2.4rem, 5vw, 4.2rem);
+  font-size: clamp(2.2rem, 3.6vw, 3rem);
   color: var(--accent);
-  margin: 0.6rem 0 0.3rem;
-  letter-spacing: 0.06em;
+  margin: 0.5rem 0 0.25rem;
+  letter-spacing: 0.07em;
   text-shadow: 0 0 24px var(--gold-glow);
 }
 
@@ -372,7 +362,7 @@ tr.rank-3 td:nth-child(2) { color: var(--bronze); font-weight: 700; }
   color: var(--muted);
   margin: 0;
   font-style: italic;
-  font-size: 1.15rem;
+  font-size: 1.05rem;
 }
 
 .muted { color: var(--muted); font-size: 0.92rem; }
@@ -393,8 +383,8 @@ input[type="text"], input[type="password"], input[type="date"], textarea, select
   border: 1px solid var(--border);
   background: #0e1218;
   color: var(--text);
-  font-family: var(--font-body);
-  font-size: 1.02rem;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 1.05rem;
 }
 
 textarea { resize: vertical; min-height: 110px; }
@@ -427,7 +417,7 @@ button:active { transform: translateY(0); }
 button.secondary {
   background: transparent;
   border: 1px solid var(--border);
-  color: var(--text-heading);
+  color: var(--text);
   box-shadow: none;
 }
 button.secondary:hover { border-color: var(--accent-dim); color: var(--accent); background: rgba(212,175,90,0.07); }
@@ -450,8 +440,7 @@ button.secondary:hover { border-color: var(--accent-dim); color: var(--accent); 
   color: var(--muted);
   font-size: 0.85rem;
   margin-bottom: 0.4rem;
-  font-family: var(--font-body);
-  font-weight: 600;
+  font-family: "Cinzel", serif;
   letter-spacing: 0.03em;
 }
 
@@ -471,8 +460,7 @@ button.secondary:hover { border-color: var(--accent-dim); color: var(--accent); 
   gap: 0.4rem;
   color: var(--muted);
   font-size: 0.85rem;
-  font-family: var(--font-body);
-  font-weight: 600;
+  font-family: "Cinzel", serif;
   letter-spacing: 0.03em;
 }
 
@@ -698,9 +686,9 @@ button.danger {
 }
 
 .lede {
-  font-family: var(--font-body);
+  font-family: "Cormorant Garamond", serif;
   font-style: italic;
-  font-size: 1.25rem;
+  font-size: 1.35rem;
   line-height: 1.6;
   text-align: center;
   color: var(--text);
@@ -788,8 +776,7 @@ button.danger {
 .archive-card .archive-date {
   font-size: 0.75rem;
   color: var(--muted);
-  font-family: var(--font-body);
-  font-weight: 600;
+  font-family: "Cinzel", serif;
 }
 
 .tab-row {
@@ -879,7 +866,7 @@ button.danger {
   text-transform: uppercase;
   font-size: 0.72rem;
   letter-spacing: 0.08em;
-  font-family: var(--font-body);
+  font-family: "Cinzel", serif;
   font-weight: 600;
   padding-top: 0;
   padding-bottom: 0.7rem;
@@ -894,17 +881,15 @@ button.danger {
   border-radius: 50%;
   border: 1px solid var(--border);
   background: rgba(255,255,255,0.02);
-  font-family: var(--font-body);
+  font-family: "Cinzel", serif;
   font-size: 1.05rem;
   font-weight: 700;
   color: var(--muted);
 }
 
 .lb-name {
-  font-family: var(--font-body);
-  font-weight: 600;
-  color: var(--text-heading);
-  font-size: 1.15rem;
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1.2rem;
   letter-spacing: 0.01em;
 }
 
