@@ -128,7 +128,7 @@ nav a:hover, nav a.active {
 
 main {
   max-width: 900px;
-  margin: -300px auto 0;
+  margin: -340px auto 0;
   padding: 2.2rem 1.5rem 4rem;
   position: relative;
   z-index: 1;
@@ -136,7 +136,7 @@ main {
 
 @media (max-width: 560px) {
   main {
-    margin-top: -160px;
+    margin-top: -180px;
   }
 }
 
@@ -238,11 +238,11 @@ tr.rank-3 td:nth-child(2) { color: var(--bronze); font-weight: 700; }
 .hero-banner.hero-photo {
   background-size: cover;
   background-position: center;
-  min-height: 100vh;
+  min-height: 112vh;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  padding: clamp(90px, 18vh, 200px) 1rem 2rem;
+  padding: clamp(50px, 10vh, 130px) 1rem 2rem;
 }
 
 .hero-banner.hero-photo::before {
@@ -259,26 +259,25 @@ tr.rank-3 td:nth-child(2) { color: var(--bronze); font-weight: 700; }
   pointer-events: none;
   opacity: 1;
   background-image: none;
-  /* A tight vignette keeps the title legible without veiling the whole photo.
-     The fade settles on plain var(--bg) — the same flat background every
-     panel on the site already sits on — rather than trying to hue-match the
-     panel's own top edge, which has its own vignette/glow layered on top and
-     is never quite a flat color to match against. Finishes well before the
-     overlapping content starts (see main's negative margin below), leaving a
-     wide solid buffer instead of a sudden drop. */
+  /* One continuous curve, no flat held stretch anywhere — a flat plateau
+     reads as its own distinct band next to the textured page background
+     beyond the hero, which was the "third gray zone". Darkening is delayed:
+     the photo stays clearly visible through the first half, then eases into
+     var(--bg) only right at the very bottom edge. */
   background:
-    radial-gradient(ellipse 640px 320px at center 22%, rgba(10, 12, 17, 0.6), transparent 68%),
+    radial-gradient(ellipse 640px 320px at center 18%, rgba(10, 12, 17, 0.62), transparent 66%),
     linear-gradient(
       to bottom,
-      rgba(17, 21, 28, 0.05) 0%,
-      rgba(17, 21, 28, 0.04) 15%,
-      rgba(17, 21, 28, 0.07) 28%,
-      rgba(17, 21, 28, 0.13) 38%,
-      rgba(17, 21, 28, 0.22) 46%,
-      rgba(17, 21, 28, 0.34) 54%,
-      rgba(17, 21, 28, 0.48) 61%,
-      rgba(17, 21, 28, 0.62) 67%,
-      var(--bg) 72%,
+      rgba(17, 21, 28, 0.1) 0%,
+      rgba(17, 21, 28, 0.08) 18%,
+      rgba(17, 21, 28, 0.09) 34%,
+      rgba(17, 21, 28, 0.13) 48%,
+      rgba(17, 21, 28, 0.2) 59%,
+      rgba(17, 21, 28, 0.3) 68%,
+      rgba(17, 21, 28, 0.44) 76%,
+      rgba(17, 21, 28, 0.6) 83%,
+      rgba(17, 21, 28, 0.78) 89%,
+      rgba(17, 21, 28, 0.92) 95%,
       var(--bg) 100%
     );
 }
@@ -291,8 +290,8 @@ tr.rank-3 td:nth-child(2) { color: var(--bronze); font-weight: 700; }
 
 @media (max-width: 560px) {
   .hero-banner.hero-photo {
-    min-height: 82vh;
-    padding-top: clamp(60px, 14vh, 120px);
+    min-height: 90vh;
+    padding-top: clamp(40px, 8vh, 90px);
   }
 }
 
