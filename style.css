@@ -38,19 +38,6 @@ body {
 
 ::selection { background: var(--gold-glow); }
 
-/* Faint hex-grid texture, like an old campaign map's coordinate grid */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='104'%3E%3Cpolygon points='30,2 56,17 56,47 30,62 4,47 4,17' fill='none' stroke='%235aa9d6' stroke-width='1' opacity='0.35'/%3E%3C/svg%3E");
-  background-repeat: repeat;
-  background-size: 60px 104px;
-  opacity: 0.4;
-}
-
 body::after {
   content: "";
   position: fixed;
@@ -135,8 +122,16 @@ nav a:hover, nav a.active {
 
 main {
   max-width: 900px;
-  margin: 0 auto;
+  margin: -260px auto 0;
   padding: 2.2rem 1.5rem 4rem;
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 560px) {
+  main {
+    margin-top: -160px;
+  }
 }
 
 .panel {
@@ -237,7 +232,7 @@ tr.rank-3 td:nth-child(2) { color: var(--bronze); font-weight: 700; }
 .hero-banner.hero-photo {
   background-size: cover;
   background-position: center;
-  min-height: 620px;
+  min-height: 88vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -258,37 +253,31 @@ tr.rank-3 td:nth-child(2) { color: var(--bronze); font-weight: 700; }
   pointer-events: none;
   opacity: 1;
   background-image: none;
-  background: linear-gradient(
-    to bottom,
-    rgba(17, 21, 28, 0.6) 0%,
-    rgba(17, 21, 28, 0.58) 40%,
-    rgba(17, 21, 28, 0.82) 65%,
-    var(--bg) 100%
-  );
-}
-
-.hero-banner.hero-photo::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='104'%3E%3Cpolygon points='30,2 56,17 56,47 30,62 4,47 4,17' fill='none' stroke='%235aa9d6' stroke-width='1' opacity='0.5'/%3E%3C/svg%3E");
-  background-repeat: repeat;
-  background-size: 60px 104px;
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, transparent 45%, black 85%);
-  mask-image: linear-gradient(to bottom, transparent 0%, transparent 45%, black 85%);
+  /* A tight vignette keeps the title legible without veiling the whole photo,
+     and the long tail at the bottom fades the image smoothly into the page
+     background so overlapping content reads cleanly. */
+  background:
+    radial-gradient(ellipse 640px 320px at center 38%, rgba(10, 12, 17, 0.6), transparent 68%),
+    linear-gradient(
+      to bottom,
+      rgba(17, 21, 28, 0.12) 0%,
+      rgba(17, 21, 28, 0.08) 22%,
+      rgba(17, 21, 28, 0.18) 45%,
+      rgba(17, 21, 28, 0.4) 62%,
+      rgba(17, 21, 28, 0.72) 78%,
+      var(--bg) 100%
+    );
 }
 
 .hero-banner.hero-photo h1,
 .hero-banner.hero-photo p,
 .hero-banner.hero-photo .crest {
-  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.95), 0 0 34px rgba(0, 0, 0, 0.7);
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.98), 0 0 40px rgba(0, 0, 0, 0.85), 0 0 8px rgba(0, 0, 0, 0.95);
 }
 
 @media (max-width: 560px) {
   .hero-banner.hero-photo {
-    min-height: 400px;
+    min-height: 68vh;
   }
 }
 
@@ -787,10 +776,12 @@ button.danger {
 }
 
 .tab-row button.inactive {
-  background: transparent;
-  color: var(--muted);
+  background: rgba(17, 21, 28, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: var(--text);
   border: 1px solid var(--border);
-  box-shadow: none;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.3);
 }
 
 .checkbox-row {
