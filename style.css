@@ -237,7 +237,25 @@ tr.rank-3 td:nth-child(2) { color: var(--bronze); font-weight: 700; }
 .hero-banner.hero-photo {
   background-size: cover;
   background-position: center;
-  padding: 3.4rem 1rem 3rem;
+  min-height: 460px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
+.hero-banner.hero-photo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgba(17, 21, 28, 0.5) 0%,
+    rgba(17, 21, 28, 0.62) 55%,
+    var(--bg) 100%
+  );
 }
 
 .cover-photo-box {
