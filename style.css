@@ -237,8 +237,8 @@ tr.rank-3 td:nth-child(2) { color: var(--bronze); font-weight: 700; }
 
 .hero-banner.hero-photo {
   background-size: cover;
-  background-position: center;
-  min-height: 112vh;
+  background-position: center 62.5%;
+  min-height: 98vh;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -290,7 +290,7 @@ tr.rank-3 td:nth-child(2) { color: var(--bronze); font-weight: 700; }
 
 @media (max-width: 560px) {
   .hero-banner.hero-photo {
-    min-height: 90vh;
+    min-height: 78.75vh;
     padding-top: clamp(40px, 8vh, 90px);
   }
 }
