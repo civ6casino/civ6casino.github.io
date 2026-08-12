@@ -259,34 +259,33 @@ tr.rank-3 td:nth-child(2) { color: var(--bronze); font-weight: 700; }
   pointer-events: none;
   opacity: 1;
   background-image: none;
-  /* One continuous curve, no flat held stretch anywhere — a flat plateau
-     reads as its own distinct band next to the textured page background
-     beyond the hero, which was the "third gray zone". Darkening is delayed:
-     the photo stays clearly visible through the first half, then eases into
-     var(--bg) only right at the very bottom edge. Stops are dense in the
-     final stretch so the curve reads as smooth even at the shorter hero
-     height — coarse stops there is what read as a seam. */
+  /* Darkening is delayed so the photo stays clearly visible through the
+     first half, then ramps up and is ESSENTIALLY FULLY OPAQUE by ~90%
+     height — leaving a genuine dark buffer margin before the box's bottom
+     edge. This is deliberate: whatever happens to sit at the tail end of
+     the visible crop (foam, sky, stonework — varies per image and per
+     screen aspect ratio, since cover-cropping isn't the same on every
+     window shape) needs to be fully masked well before the hard edge, or
+     it shows through as a seam right at the hero/page boundary. */
   background:
     radial-gradient(ellipse 640px 320px at center 18%, rgba(10, 12, 17, 0.62), transparent 66%),
     linear-gradient(
       to bottom,
       rgba(17, 21, 28, 0.08) 0%,
       rgba(17, 21, 28, 0.09) 15%,
-      rgba(17, 21, 28, 0.13) 30%,
-      rgba(17, 21, 28, 0.19) 42%,
-      rgba(17, 21, 28, 0.27) 52%,
-      rgba(17, 21, 28, 0.35) 60%,
-      rgba(17, 21, 28, 0.43) 67%,
-      rgba(17, 21, 28, 0.51) 73%,
-      rgba(17, 21, 28, 0.59) 78%,
-      rgba(17, 21, 28, 0.65) 82%,
-      rgba(17, 21, 28, 0.72) 86%,
-      rgba(17, 21, 28, 0.78) 89%,
-      rgba(17, 21, 28, 0.83) 92%,
-      rgba(17, 21, 28, 0.88) 94.5%,
-      rgba(17, 21, 28, 0.92) 96.5%,
-      rgba(17, 21, 28, 0.96) 98%,
-      rgba(17, 21, 28, 0.98) 99%,
+      rgba(17, 21, 28, 0.12) 28%,
+      rgba(17, 21, 28, 0.17) 40%,
+      rgba(17, 21, 28, 0.24) 50%,
+      rgba(17, 21, 28, 0.32) 58%,
+      rgba(17, 21, 28, 0.42) 65%,
+      rgba(17, 21, 28, 0.53) 71%,
+      rgba(17, 21, 28, 0.64) 76%,
+      rgba(17, 21, 28, 0.74) 80%,
+      rgba(17, 21, 28, 0.83) 84%,
+      rgba(17, 21, 28, 0.90) 87%,
+      rgba(17, 21, 28, 0.95) 90%,
+      rgba(17, 21, 28, 0.98) 93%,
+      var(--bg) 96%,
       var(--bg) 100%
     );
 }
