@@ -136,13 +136,38 @@ nav a:hover, nav a.active {
    through) and half below it, painting its own clean fade across the join.
    Zero footprint in the layout: negative margin-top exactly cancels its own
    height, so `main`'s position is unaffected. */
+/* Bridges the hard edge where the hero's own clipped background (photo +
+   fade overlay) ends and the page's own background begins. Two problems
+   compound here: (1) the hero's fade is flat while the page has a faint
+   diagonal grain, and (2) the page's true background isn't a flat
+   var(--bg) either — it carries a subtle vignette/tint on top of it, so
+   even matching var(--bg) exactly produces a visible step against it.
+   Fix for both: this covers the hero's tail with a clean var(--bg), then
+   fades that back OUT to transparent a little past the boundary, handing
+   off to the page's real, unaltered pixels instead of guessing a flat
+   color to match them. Absolutely positioned so it can bleed on both
+   sides of the join without touching layout — `main`'s position is
+   completely unaffected. */
 .hero-fade-mask {
-  height: 160px;
-  margin-top: -160px;
   position: relative;
+  height: 0;
   z-index: 1;
   pointer-events: none;
-  background: linear-gradient(to bottom, transparent 0%, var(--bg) 75%, var(--bg) 100%);
+}
+.hero-fade-mask::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -170px;
+  height: 220px;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    var(--bg) 55%,
+    var(--bg) 78%,
+    transparent 100%
+  );
 }
 
 main {
