@@ -1,4 +1,4 @@
-// Civ 6 Şeref Listesi — shared login widget + session handling.
+// Civ 6 Casino — shared login widget + session handling.
 // Loaded on every page right after config.js. Renders into <div id="auth-widget"></div>
 // which must exist in the header markup. Sessions persist automatically via
 // supabase-js (stored in localStorage), so a logged-in user stays logged in

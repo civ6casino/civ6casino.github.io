@@ -29,6 +29,7 @@ html, body {
 }
 
 body {
+  position: relative;
   font-family: "Cormorant Garamond", "Georgia", "Times New Roman", serif;
   background:
     radial-gradient(circle at 15% 0%, rgba(90, 169, 214, 0.08), transparent 45%),
@@ -61,19 +62,25 @@ header {
   background:
     repeating-linear-gradient(135deg, rgba(255,255,255,0.018) 0px, rgba(255,255,255,0.018) 1px, transparent 1px, transparent 5px),
     repeating-linear-gradient(45deg, rgba(0,0,0,0.12) 0px, rgba(0,0,0,0.12) 1px, transparent 1px, transparent 7px),
-    linear-gradient(180deg, #1a2028, #141920);
-  border-bottom: 3px double var(--accent-dim);
+    linear-gradient(180deg, rgba(26,32,40,0.5), rgba(20,25,32,0.5));
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  border-bottom: 3px double rgba(212,175,90,0.5);
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.05),
-    0 2px 0 rgba(212,175,90,0.15),
-    0 6px 16px rgba(0,0,0,0.35);
+    0 2px 0 rgba(212,175,90,0.1),
+    0 6px 16px rgba(0,0,0,0.25);
   padding: 1.1rem 1.8rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 0.5rem;
-  position: relative;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
 }
 
 header::after {
@@ -144,16 +151,6 @@ nav a:hover, nav a.active {
 }
 
 /* Bridges the hard edge where the hero's own clipped background (photo +
-   fade overlay) ends and the page's own textured/tinted background begins.
-   Even when both sides land on the same nominal dark color, the hero's fade
-   is flat while the page background has a faint diagonal grain and color
-   tints — that texture-only discontinuity is what reads as a seam, no
-   matter how gradual the hero's internal gradient is. This sits half inside
-   the hero's tail (already ~85-90% darkened there, so little photo shows
-   through) and half below it, painting its own clean fade across the join.
-   Zero footprint in the layout: negative margin-top exactly cancels its own
-   height, so `main`'s position is unaffected. */
-/* Bridges the hard edge where the hero's own clipped background (photo +
    fade overlay) ends and the page's own background begins. Two problems
    compound here: (1) the hero's fade is flat while the page has a faint
    diagonal grain, and (2) the page's true background isn't a flat
@@ -189,7 +186,7 @@ nav a:hover, nav a.active {
 
 main {
   max-width: 900px;
-  margin: -340px auto 0;
+  margin: -383px auto 0;
   padding: 2.2rem 1.5rem 4rem;
   position: relative;
   z-index: 1;
@@ -197,7 +194,7 @@ main {
 
 @media (max-width: 560px) {
   main {
-    margin-top: -180px;
+    margin-top: -203px;
   }
 }
 
@@ -290,7 +287,7 @@ tr.rank-3 td:nth-child(2) { color: var(--bronze); font-weight: 700; }
 
 .hero-banner {
   text-align: center;
-  padding: 2.4rem 1rem 2rem;
+  padding: calc(2.4rem + 92px) 1rem 2rem;
   margin-bottom: 0;
   position: relative;
   overflow: hidden;
@@ -303,7 +300,7 @@ tr.rank-3 td:nth-child(2) { color: var(--bronze); font-weight: 700; }
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  padding: clamp(50px, 10vh, 130px) 1rem 2rem;
+  padding: calc(clamp(50px, 10vh, 130px) + 92px) 1rem 2rem;
 }
 
 .hero-banner.hero-photo::before {
@@ -360,7 +357,10 @@ tr.rank-3 td:nth-child(2) { color: var(--bronze); font-weight: 700; }
 @media (max-width: 560px) {
   .hero-banner.hero-photo {
     min-height: 78.75vh;
-    padding-top: clamp(40px, 8vh, 90px);
+    padding-top: calc(clamp(40px, 8vh, 90px) + 130px);
+  }
+  .hero-banner:not(.hero-photo) {
+    padding-top: calc(2.4rem + 130px);
   }
 }
 
