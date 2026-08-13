@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Cinzel+Decorative:wght@700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Cinzel+Decorative:wght@700&family=Forum&display=swap');
 
 :root {
   --bg: #11151c;
@@ -93,10 +93,11 @@ header::after {
 
 header h1 {
   margin: 0;
-  font-size: 1.5rem;
+  font-family: "Cinzel Decorative", "Cinzel", "Georgia", serif;
+  font-size: 1.7rem;
   font-weight: 700;
   color: var(--accent);
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
   text-shadow: 0 0 18px var(--gold-glow), 0 1px 1px rgba(0,0,0,0.55), 0 -1px 0 rgba(255,241,214,0.12);
 }
 
@@ -186,7 +187,7 @@ nav a:hover, nav a.active {
 
 main {
   max-width: 900px;
-  margin: -383px auto 0;
+  margin: -362px auto 0;
   padding: 2.2rem 1.5rem 4rem;
   position: relative;
   z-index: 1;
@@ -194,7 +195,7 @@ main {
 
 @media (max-width: 560px) {
   main {
-    margin-top: -203px;
+    margin-top: -192px;
   }
 }
 
@@ -499,6 +500,7 @@ button.secondary:hover { border-color: var(--accent-dim); color: var(--accent); 
   padding: 0.9rem 1.1rem;
   margin-bottom: 0.8rem;
   background: rgba(255,255,255,0.015);
+  font-family: "Forum", serif;
 }
 
 .game-card:target {
@@ -510,7 +512,7 @@ button.secondary:hover { border-color: var(--accent-dim); color: var(--accent); 
   color: var(--muted);
   font-size: 0.85rem;
   margin-bottom: 0.4rem;
-  font-family: "Cinzel", serif;
+  font-family: "Forum", serif;
   letter-spacing: 0.03em;
 }
 
@@ -530,7 +532,7 @@ button.secondary:hover { border-color: var(--accent-dim); color: var(--accent); 
   gap: 0.4rem;
   color: var(--muted);
   font-size: 0.85rem;
-  font-family: "Cinzel", serif;
+  font-family: "Forum", serif;
   letter-spacing: 0.03em;
 }
 
@@ -565,7 +567,7 @@ button.danger {
 
 .game-card h3 {
   color: var(--accent);
-  font-family: "Cinzel", serif;
+  font-family: "Forum", serif;
   font-size: 1.1rem;
 }
 
@@ -613,12 +615,13 @@ button.danger {
   padding: 1.2rem 1.3rem;
   margin-bottom: 1.1rem;
   background: rgba(255,255,255,0.015);
+  font-family: "Forum", serif;
 }
 
 .post-card h3 {
   margin: 0 0 0.3rem;
   color: var(--accent);
-  font-family: "Cinzel", serif;
+  font-family: "Forum", serif;
   font-size: 1.15rem;
 }
 
@@ -627,6 +630,7 @@ button.danger {
   font-size: 0.82rem;
   margin-bottom: 0.7rem;
   font-style: italic;
+  font-family: "Forum", serif;
 }
 
 .post-card-compact {
@@ -635,11 +639,12 @@ button.danger {
   padding: 1rem 1.2rem;
   margin-bottom: 1rem;
   background: rgba(255,255,255,0.015);
+  font-family: "Forum", serif;
 }
 
 .post-card-compact h3 {
   margin: 0 0 0.3rem;
-  font-family: "Cinzel", serif;
+  font-family: "Forum", serif;
   font-size: 1.1rem;
 }
 
@@ -659,11 +664,13 @@ button.danger {
   font-size: 0.92rem;
   line-height: 1.5;
   margin: 0.5rem 0 0;
+  font-family: "Forum", serif;
 }
 
 .post-body {
   line-height: 1.75;
   font-size: 1.08rem;
+  font-family: "Forum", serif;
 }
 
 .post-body p {
@@ -1082,7 +1089,7 @@ button.danger {
 
 @media (max-width: 560px) {
   header { padding: 0.9rem 1rem; }
-  header h1 { font-size: 1.15rem; }
+  header h1 { font-size: 1.3rem; }
   .header-left { flex-wrap: wrap; }
   nav a { margin-left: 0.4rem; padding: 0.35rem 0.6rem; font-size: 0.78rem; }
   main { padding: 1.4rem 1rem 3rem; }
