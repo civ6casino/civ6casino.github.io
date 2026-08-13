@@ -515,6 +515,7 @@ async function loadManageList() {
             <button data-id="${g.id}" class="secondary poll-results-btn">🗳️ Anket Sonuçları</button>
             <button data-id="${g.id}" class="secondary edit-gameinfo-btn">📖 Oyun Bilgisi</button>
             <button data-id="${g.id}" class="secondary cover-photo-btn">🖼️ Kapak Fotoğrafı</button>
+            <button data-id="${g.id}" class="secondary post-compose-btn">✍️ Yazı Ekle</button>
             <button data-id="${g.id}" class="danger delete-game">Sil</button>
           </div>
         </div>
@@ -541,6 +542,7 @@ async function loadManageList() {
           ${g.cover_image_url ? `<button type="button" class="secondary cover-photo-remove-btn" data-id="${g.id}">Kaldır</button>` : ''}
           <div class="cover-photo-msg"></div>
         </div>
+        <div class="post-compose-form" id="post-compose-form-${g.id}" style="display:none; margin-top:1rem;"></div>
       </div>
     `;
   }).join('');
@@ -588,6 +590,12 @@ async function loadManageList() {
     btn.addEventListener('click', () => {
       const formEl = document.getElementById(`cover-photo-form-${btn.dataset.id}`);
       formEl.style.display = formEl.style.display === 'block' ? 'none' : 'block';
+    });
+  });
+
+  document.querySelectorAll('.post-compose-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      togglePostComposeForm(btn.dataset.id);
     });
   });
 
@@ -774,6 +782,141 @@ async function saveBadgeAwards(gameId, formEl) {
   msgEl.textContent = 'Rozetler kaydedildi.';
   msgEl.className = 'success';
   loadManageList();
+}
+
+function togglePostComposeForm(gameId) {
+  const formEl = document.getElementById(`post-compose-form-${gameId}`);
+  const opening = formEl.style.display !== 'block';
+
+  if (!opening) {
+    formEl.style.display = 'none';
+    return;
+  }
+
+  formEl.innerHTML = `
+    <label for="post-title-${gameId}">Başlık</label>
+    <input type="text" id="post-title-${gameId}" placeholder="örn. Persepolis'in Düşüşü">
+    <label for="post-body-${gameId}">Hikaye</label>
+    <textarea id="post-body-${gameId}" placeholder="Hikayeni anlat... İmleci istediğin yere koyup 'Resim Ekle' ile araya fotoğraf serpiştirebilirsin." style="min-height:200px;"></textarea>
+    <div class="checkbox-row" style="margin-top:0.6rem;">
+      <button type="button" class="secondary post-image-insert-btn" data-id="${gameId}">🖼️ Resim Ekle</button>
+      <input type="file" class="post-image-insert-file" data-id="${gameId}" accept="image/*" style="display:none;">
+      <span class="post-image-status muted" data-id="${gameId}"></span>
+    </div>
+    <label for="post-audio-${gameId}">🔊 Sesli Özet (isteğe bağlı)</label>
+    <input type="file" id="post-audio-${gameId}" accept="audio/*">
+    <div class="checkbox-row">
+      <input type="checkbox" id="post-anonymous-${gameId}">
+      <label for="post-anonymous-${gameId}">Anonim olarak paylaş</label>
+    </div>
+    <button class="post-submit-btn" data-id="${gameId}">Kaydı Yayınla</button>
+    <div class="post-msg"></div>
+  `;
+
+  formEl.querySelector('.post-image-insert-btn').addEventListener('click', () => {
+    formEl.querySelector('.post-image-insert-file').click();
+  });
+
+  formEl.querySelector('.post-image-insert-file').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const statusEl = formEl.querySelector('.post-image-status');
+    statusEl.textContent = 'Resim yükleniyor...';
+    statusEl.className = 'post-image-status muted';
+    try {
+      const url = await uploadPostImage(file);
+      insertAtCursor(formEl.querySelector(`#post-body-${gameId}`), `\n![](${url})\n`);
+      statusEl.textContent = 'Resim eklendi.';
+      statusEl.className = 'post-image-status success';
+    } catch (err) {
+      statusEl.textContent = 'Resim yüklenemedi: ' + err.message;
+      statusEl.className = 'post-image-status error';
+    }
+    e.target.value = '';
+  });
+
+  formEl.querySelector('.post-submit-btn').addEventListener('click', () => submitPost(gameId, formEl));
+
+  formEl.style.display = 'block';
+}
+
+function insertAtCursor(textarea, text) {
+  const start = textarea.selectionStart;
+  const end = textarea.selectionEnd;
+  const before = textarea.value.slice(0, start);
+  const after = textarea.value.slice(end);
+  textarea.value = before + text + after;
+  const cursorPos = start + text.length;
+  textarea.focus();
+  textarea.setSelectionRange(cursorPos, cursorPos);
+}
+
+async function uploadPostImage(file) {
+  const path = `${Civ6Auth.currentUser.id}/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9_.-]/g, '_')}`;
+  const { error: uploadErr } = await supabaseClient.storage.from('blog-images').upload(path, file);
+  if (uploadErr) throw uploadErr;
+  const { data: publicUrlData } = supabaseClient.storage.from('blog-images').getPublicUrl(path);
+  return publicUrlData.publicUrl;
+}
+
+async function uploadPostAudio(file) {
+  const path = `${Civ6Auth.currentUser.id}/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9_.-]/g, '_')}`;
+  const { error: uploadErr } = await supabaseClient.storage.from('blog-audio').upload(path, file);
+  if (uploadErr) throw uploadErr;
+  const { data: publicUrlData } = supabaseClient.storage.from('blog-audio').getPublicUrl(path);
+  return publicUrlData.publicUrl;
+}
+
+async function submitPost(gameId, formEl) {
+  const msgEl = formEl.querySelector('.post-msg');
+  msgEl.textContent = '';
+  msgEl.className = '';
+
+  const title = formEl.querySelector(`#post-title-${gameId}`).value.trim();
+  const body = formEl.querySelector(`#post-body-${gameId}`).value.trim();
+  const isAnonymous = formEl.querySelector(`#post-anonymous-${gameId}`).checked;
+  const audioInput = formEl.querySelector(`#post-audio-${gameId}`);
+  const audioFile = audioInput.files[0];
+
+  if (!title || !body) {
+    msgEl.textContent = 'Lütfen bir başlık ve biraz hikaye metni ekle.';
+    msgEl.className = 'error';
+    return;
+  }
+
+  let audioUrl = null;
+  if (audioFile) {
+    try {
+      audioUrl = await uploadPostAudio(audioFile);
+    } catch (err) {
+      msgEl.textContent = 'Sesli özet yüklenemedi: ' + err.message;
+      msgEl.className = 'error';
+      return;
+    }
+  }
+
+  const { error: insertErr } = await supabaseClient.from('posts').insert({
+    author_id: Civ6Auth.currentUser.id,
+    author_name: Civ6Auth.currentUsername,
+    is_anonymous: isAnonymous,
+    title,
+    body,
+    game_id: gameId,
+    audio_url: audioUrl
+  });
+
+  if (insertErr) {
+    msgEl.textContent = 'Yayınlama başarısız oldu: ' + insertErr.message;
+    msgEl.className = 'error';
+    return;
+  }
+
+  msgEl.textContent = 'Kayıt yayınlandı!';
+  msgEl.className = 'success';
+  formEl.querySelector(`#post-title-${gameId}`).value = '';
+  formEl.querySelector(`#post-body-${gameId}`).value = '';
+  formEl.querySelector(`#post-anonymous-${gameId}`).checked = false;
+  formEl.querySelector(`#post-audio-${gameId}`).value = '';
 }
 
 async function loadBadgesCache() {
