@@ -51,7 +51,13 @@
 
 <main>
   <section class="panel">
+    <div class="profile-avatar-block" id="profile-avatar-block"></div>
     <p class="muted">Bu kahramanın hikayesi henüz yazılmadı. Yakında burada oyuncunun istatistikleri, favori medeniyetleri ve daha fazlası yer alacak.</p>
+  </section>
+
+  <section class="panel">
+    <h2>🎵 Tema Müzikleri</h2>
+    <div id="theme-songs" class="muted">Yükleniyor...</div>
   </section>
 
   <section class="panel">
@@ -69,17 +75,100 @@ const playerName = params.get('oyuncu') || '';
 
 document.getElementById('player-name-heading').textContent = playerName || 'Bilinmeyen Kahraman';
 
+let linkedProfileId = null;
+
 async function loadLinkedAccount() {
   if (!playerName) return;
   const { data: profile } = await supabaseClient
     .from('profiles')
-    .select('username')
+    .select('id, username, avatar_url')
     .eq('player_name', playerName)
     .maybeSingle();
 
   if (profile) {
+    linkedProfileId = profile.id;
     document.getElementById('player-subtitle').textContent = `Bu kahramanı temsil eden üye: ${profile.username}`;
   }
+
+  renderAvatarBlock(profile ? profile.avatar_url : null);
+}
+
+function renderAvatarBlock(avatarUrl) {
+  const el = document.getElementById('profile-avatar-block');
+  const isOwnProfile = !!(Civ6Auth.currentUser && linkedProfileId === Civ6Auth.currentUser.id);
+
+  el.innerHTML = `
+    ${Civ6Auth.avatarHtml(avatarUrl, 84)}
+    ${isOwnProfile ? `
+      <div>
+        <label for="avatar-file" style="margin:0 0 0.3rem;">Profil Fotoğrafı</label>
+        <input type="file" id="avatar-file" accept="image/*">
+        <div id="avatar-msg" class="muted" style="margin-top:0.3rem;"></div>
+      </div>
+    ` : ''}
+  `;
+
+  if (isOwnProfile) {
+    document.getElementById('avatar-file').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const msgEl = document.getElementById('avatar-msg');
+      msgEl.textContent = 'Yükleniyor...';
+      msgEl.className = 'muted';
+
+      const path = `${Civ6Auth.currentUser.id}/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9_.-]/g, '_')}`;
+      const { error: uploadErr } = await supabaseClient.storage.from('avatars').upload(path, file);
+      if (uploadErr) {
+        msgEl.textContent = 'Yüklenemedi: ' + uploadErr.message;
+        msgEl.className = 'error';
+        return;
+      }
+      const { data: pub } = supabaseClient.storage.from('avatars').getPublicUrl(path);
+      const { error: updErr } = await supabaseClient.from('profiles').update({ avatar_url: pub.publicUrl }).eq('id', Civ6Auth.currentUser.id);
+      if (updErr) {
+        msgEl.textContent = 'Kaydedilemedi: ' + updErr.message;
+        msgEl.className = 'error';
+        return;
+      }
+      msgEl.textContent = 'Profil fotoğrafı güncellendi!';
+      msgEl.className = 'success';
+      renderAvatarBlock(pub.publicUrl);
+    });
+  }
+}
+
+async function loadThemeSongs() {
+  const el = document.getElementById('theme-songs');
+  if (!playerName) {
+    el.innerHTML = `<p class="muted">Oyuncu belirtilmedi.</p>`;
+    return;
+  }
+
+  const { data: songs, error } = await supabaseClient
+    .from('playlist_songs')
+    .select('theme, song_name, song_url')
+    .eq('author_name', playerName);
+
+  if (error) {
+    el.innerHTML = `<p class="error">Tema müzikleri yüklenemedi.</p>`;
+    console.error(error);
+    return;
+  }
+
+  const saldiri = (songs || []).find(s => s.theme === 'saldiri');
+  const direnis = (songs || []).find(s => s.theme === 'direnis');
+
+  function slot(label, song) {
+    if (!song) return `<div class="theme-slot"><div class="theme-slot-label">${label}</div><div class="theme-slot-song muted">Henüz eklenmedi</div></div>`;
+    return `
+      <div class="theme-slot">
+        <div class="theme-slot-label">${label}</div>
+        <div class="theme-slot-song"><a href="${escapeHtml(song.song_url)}" target="_blank" rel="noopener">${escapeHtml(song.song_name)}</a></div>
+      </div>
+    `;
+  }
+
+  el.innerHTML = slot('🗡️ Saldırı', saldiri) + slot('🛡️ Direniş', direnis);
 }
 
 async function loadBadges() {
@@ -132,8 +221,13 @@ function escapeHtml(str) {
   return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
+Civ6Auth.onChange(() => {
+  loadLinkedAccount();
+});
+
 loadLinkedAccount();
 loadBadges();
+loadThemeSongs();
 </script>
 </body>
 </html>

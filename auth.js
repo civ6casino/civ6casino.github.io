@@ -282,10 +282,29 @@ const Civ6Auth = (() => {
     }
   });
 
+  async function fetchAvatars(authorIds) {
+    const uniqueIds = [...new Set((authorIds || []).filter(Boolean))];
+    if (uniqueIds.length === 0) return {};
+    const { data } = await supabaseClient.from('profiles').select('id, avatar_url').in('id', uniqueIds);
+    const map = {};
+    (data || []).forEach(p => { if (p.avatar_url) map[p.id] = p.avatar_url; });
+    return map;
+  }
+
+  function avatarHtml(url, size) {
+    size = size || 26;
+    if (url) {
+      return `<img class="avatar-icon" src="${escapeHtml(url)}" style="width:${size}px;height:${size}px;" alt="">`;
+    }
+    return `<span class="avatar-icon avatar-placeholder" style="width:${size}px;height:${size}px;font-size:${Math.round(size * 0.55)}px;">👤</span>`;
+  }
+
   return {
     refresh,
     onChange,
     logout,
+    fetchAvatars,
+    avatarHtml,
     get currentUser() { return currentUser; },
     get currentUsername() { return currentUsername; },
     get pendingUsername() { return pendingUsername; },

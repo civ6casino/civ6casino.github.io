@@ -363,7 +363,7 @@ tr.rank-3 td:nth-child(2) { color: var(--bronze); font-weight: 700; }
 .hero-banner.hero-photo h1,
 .hero-banner.hero-photo p,
 .hero-banner.hero-photo .crest {
-  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.98), 0 0 40px rgba(0, 0, 0, 0.85), 0 0 8px rgba(0, 0, 0, 0.95);
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 1), 0 0 24px rgba(0, 0, 0, 0.95), 0 0 46px rgba(0, 0, 0, 0.85), 0 1px 1px rgba(0,0,0,1);
 }
 
 @media (max-width: 560px) {
@@ -441,11 +441,11 @@ tr.rank-3 td:nth-child(2) { color: var(--bronze); font-weight: 700; }
 }
 
 .hero-banner p {
-  color: #aab5c4;
+  color: #dfe4ec;
   margin: 0;
   font-style: italic;
   font-weight: 500;
-  font-size: 1.05rem;
+  font-size: 1.25rem;
 }
 
 .muted { color: var(--muted); font-size: 0.92rem; }
@@ -635,6 +635,94 @@ button.danger {
   color: var(--accent);
   font-family: "Forum", serif;
   font-size: 1.15rem;
+}
+
+.avatar-icon {
+  display: inline-block;
+  vertical-align: middle;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--accent-dim);
+  margin-right: 0.4rem;
+}
+
+.avatar-placeholder {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--panel2);
+  color: var(--muted);
+  line-height: 1;
+}
+
+.profile-avatar-block {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.profile-avatar-block .avatar-icon,
+.profile-avatar-block .avatar-placeholder {
+  width: 84px;
+  height: 84px;
+  font-size: 2.2rem;
+  margin-right: 0;
+  border-width: 2px;
+}
+
+.theme-roster {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.theme-player-card {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem 1.1rem;
+  background: rgba(255,255,255,0.015);
+}
+
+.theme-player-card h3 {
+  margin: 0 0 0.7rem;
+  font-family: "Cinzel", serif;
+  color: var(--accent);
+  font-size: 1.05rem;
+  display: flex;
+  align-items: center;
+}
+
+.theme-slot {
+  border-top: 1px solid var(--border);
+  padding: 0.6rem 0;
+}
+
+.theme-slot:first-of-type {
+  border-top: none;
+  padding-top: 0;
+}
+
+.theme-slot .theme-slot-label {
+  font-size: 0.8rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.25rem;
+}
+
+.theme-slot .theme-slot-song {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.theme-slot img.theme-thumb {
+  width: 64px;
+  height: 36px;
+  object-fit: cover;
+  border-radius: 4px;
+  flex-shrink: 0;
 }
 
 .post-meta {

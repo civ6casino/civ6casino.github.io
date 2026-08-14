@@ -102,6 +102,7 @@
 const params = new URLSearchParams(location.search);
 const postId = params.get('id') || '';
 let currentPost = null;
+let postAuthorAvatarUrl = null;
 
 function gameLabel(g) {
   return g.name || g.played_on;
@@ -190,6 +191,10 @@ async function loadPost() {
   }
 
   currentPost = p;
+  if (!p.is_anonymous) {
+    const avatarMap = await Civ6Auth.fetchAvatars([p.author_id]);
+    postAuthorAvatarUrl = avatarMap[p.author_id] || null;
+  }
   renderPost();
 }
 
@@ -200,9 +205,10 @@ function renderPost() {
   document.getElementById('post-title-heading').textContent = p.title;
 
   const displayName = p.is_anonymous ? 'Anonim Vakanüvis' : (p.author_name || 'Bilinmiyor');
+  const avatar = p.is_anonymous ? '' : Civ6Auth.avatarHtml(postAuthorAvatarUrl);
   const date = new Date(p.created_at).toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' });
   const gameTag = p.games ? ` · 🎮 <a href="oyun-detay.html?id=${p.game_id}">${escapeHtml(gameLabel(p.games))}</a>` : '';
-  document.getElementById('post-subtitle').innerHTML = `${escapeHtml(displayName)} tarafından · ${date}${gameTag}`;
+  document.getElementById('post-subtitle').innerHTML = `${avatar}${escapeHtml(displayName)} tarafından · ${date}${gameTag}`;
 
   const canEdit = Civ6Auth.currentUser && (p.author_id === Civ6Auth.currentUser.id || Civ6Auth.isAdmin);
   document.getElementById('post-actions').innerHTML = canEdit ? `
@@ -348,14 +354,17 @@ async function loadComments() {
     return;
   }
 
+  const avatarMap = await Civ6Auth.fetchAvatars(comments.filter(c => !c.is_anonymous).map(c => c.author_id));
+
   listEl.innerHTML = comments.map(c => {
     const displayName = c.is_anonymous ? 'Anonim Yorumcu' : escapeHtml(c.author_name || 'Bilinmiyor');
+    const avatar = c.is_anonymous ? Civ6Auth.avatarHtml(null) : Civ6Auth.avatarHtml(avatarMap[c.author_id]);
     const date = new Date(c.created_at).toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' });
     const canDelete = Civ6Auth.currentUser && (c.author_id === Civ6Auth.currentUser.id || Civ6Auth.isAdmin);
     return `
       <div class="comment-row">
         <div class="comment-meta">
-          <strong>${displayName}</strong> <span class="muted">· ${date}</span>
+          ${avatar}<strong>${displayName}</strong> <span class="muted">· ${date}</span>
           ${canDelete ? `<button type="button" class="danger delete-comment-btn" data-id="${c.id}">Sil</button>` : ''}
         </div>
         <div class="comment-body">${escapeHtml(c.body)}</div>

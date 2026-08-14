@@ -223,6 +223,8 @@ async function loadEntries() {
     return;
   }
 
+  const avatarMap = await Civ6Auth.fetchAvatars(entries.map(e => e.author_id));
+
   listEl.innerHTML = entries.map(e => {
     const date = new Date(e.created_at).toLocaleString('tr-TR', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
     const canDelete = Civ6Auth.currentUser && (e.author_id === Civ6Auth.currentUser.id || Civ6Auth.isAdmin);
@@ -230,7 +232,7 @@ async function loadEntries() {
     return `
       <div class="entry-card">
         ${canDelete ? `<div class="card-actions"><button class="danger entry-delete-btn" data-id="${e.id}">Sil</button></div>` : ''}
-        <div class="entry-meta">${escapeHtml(e.author_name || 'Bilinmiyor')} · ${date} ${gameTag}</div>
+        <div class="entry-meta">${Civ6Auth.avatarHtml(avatarMap[e.author_id])}${escapeHtml(e.author_name || 'Bilinmiyor')} · ${date} ${gameTag}</div>
         <div class="entry-body">${escapeHtml(e.body)}</div>
       </div>
     `;

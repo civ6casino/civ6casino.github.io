@@ -52,21 +52,30 @@
 
 <main>
 <section class="panel" id="compose-panel" style="display:none;">
-<h2>➕ Şarkı Ekle</h2>
+<h2>➕ Tema Müziği Ekle</h2>
+<p class="muted" id="compose-hint"></p>
+<div id="compose-fields">
 <label for="song-name">Şarkı / Parça Adı</label>
 <input type="text" id="song-name" placeholder="örn. Baba Yetu">
-<label for="song-url">Bağlantı (isteğe bağlı, tercihen YouTube)</label>
+<label for="song-theme">Tema</label>
+<select id="song-theme">
+  <option value="saldiri">🗡️ Saldırı</option>
+  <option value="direnis">🛡️ Direniş</option>
+</select>
+<label for="song-url">Bağlantı (zorunlu, tercihen YouTube)</label>
 <input type="text" id="song-url" placeholder="https://www.youtube.com/watch?v=...">
 <button id="song-submit-btn">Çalma Listesine Ekle</button>
 <div id="song-msg"></div>
+</div>
 </section>
 
 <section class="panel" id="login-hint">
-<p class="muted">Şarkı eklemek için üst köşedeki <strong>Giriş Yap</strong> düğmesini kullan.</p>
+<p class="muted">Tema müziği eklemek için üst köşedeki <strong>Giriş Yap</strong> düğmesini kullan.</p>
 </section>
 
 <section class="panel">
-<h2>📜 Mevcut Çalma Listesi</h2>
+<h2>⚔️ Savaş Marşları</h2>
+<p class="muted">Her oyuncunun saldırıda ve savunmada çalınacak kendi teması. Her oyuncu en fazla bir Saldırı ve bir Direniş teması seçebilir.</p>
 <div id="playlist-list" class="muted">Yükleniyor...</div>
 </section>
 </main>
@@ -75,6 +84,9 @@
 <script src="config.js"></script>
 <script src="auth.js"></script>
 <script>
+const ROSTER = ['Yusuf', 'Eren', 'Arda', 'Alperen', 'Taha', 'Ayaz'];
+const THEME_LABELS = { saldiri: '🗡️ Saldırı', direnis: '🛡️ Direniş' };
+
 const composePanel = document.getElementById('compose-panel');
 const loginHint = document.getElementById('login-hint');
 
@@ -84,6 +96,41 @@ Civ6Auth.onChange(() => {
   loginHint.style.display = loggedIn ? 'none' : 'block';
   loadPlaylist();
 });
+
+async function refreshComposeAvailability() {
+  const hintEl = document.getElementById('compose-hint');
+  const fieldsEl = document.getElementById('compose-fields');
+  const themeSelect = document.getElementById('song-theme');
+
+  if (!Civ6Auth.currentUser) return;
+
+  const { data: mine } = await supabaseClient
+    .from('playlist_songs')
+    .select('theme')
+    .eq('author_id', Civ6Auth.currentUser.id);
+
+  const taken = new Set((mine || []).map(s => s.theme));
+
+  if (taken.has('saldiri') && taken.has('direnis')) {
+    hintEl.textContent = 'Her iki temanı da zaten ayarladın. Değiştirmek için önce mevcut olanı sil.';
+    fieldsEl.style.display = 'none';
+    return;
+  }
+
+  fieldsEl.style.display = 'block';
+  hintEl.textContent = '';
+
+  Array.from(themeSelect.options).forEach(opt => {
+    opt.disabled = taken.has(opt.value);
+  });
+  const firstAvailable = Array.from(themeSelect.options).find(o => !o.disabled);
+  if (firstAvailable) themeSelect.value = firstAvailable.value;
+
+  if (taken.size > 0) {
+    const takenLabel = [...taken].map(t => THEME_LABELS[t]).join(', ');
+    hintEl.textContent = `Zaten ayarladığın tema: ${takenLabel}. Kalan temanı ekleyebilirsin.`;
+  }
+}
 
 document.getElementById('song-submit-btn').addEventListener('click', async () => {
   const msgEl = document.getElementById('song-msg');
@@ -98,11 +145,19 @@ document.getElementById('song-submit-btn').addEventListener('click', async () =>
 
   const nameInput = document.getElementById('song-name');
   const urlInput = document.getElementById('song-url');
+  const themeSelect = document.getElementById('song-theme');
   const songName = nameInput.value.trim();
   const songUrl = urlInput.value.trim();
+  const theme = themeSelect.value;
 
   if (!songName) {
     msgEl.textContent = 'Şarkıya bir isim ver.';
+    msgEl.className = 'error';
+    return;
+  }
+
+  if (!songUrl) {
+    msgEl.textContent = 'Bağlantı zorunludur.';
     msgEl.className = 'error';
     return;
   }
@@ -111,11 +166,14 @@ document.getElementById('song-submit-btn').addEventListener('click', async () =>
     author_id: Civ6Auth.currentUser.id,
     author_name: Civ6Auth.currentUsername,
     song_name: songName,
-    song_url: songUrl || null
+    song_url: songUrl,
+    theme
   });
 
   if (error) {
-    msgEl.textContent = 'Şarkı eklenemedi: ' + error.message;
+    msgEl.textContent = error.code === '23505'
+      ? 'Bu tema için zaten bir şarkın var.'
+      : 'Şarkı eklenemedi: ' + error.message;
     msgEl.className = 'error';
     return;
   }
@@ -139,12 +197,29 @@ function getYouTubeId(url) {
   return null;
 }
 
+function renderSongSlot(song) {
+  if (!song) {
+    return `<div class="theme-slot-song muted">Henüz eklenmedi</div>`;
+  }
+  const ytId = getYouTubeId(song.song_url);
+  const thumb = ytId
+    ? `<img class="theme-thumb" src="https://img.youtube.com/vi/${ytId}/mqdefault.jpg" alt="">`
+    : '';
+  return `
+    <div class="theme-slot-song">
+      ${thumb}
+      <a href="${escapeHtml(song.song_url)}" target="_blank" rel="noopener">${escapeHtml(song.song_name)}</a>
+      ${Civ6Auth.currentUser && song.author_id === Civ6Auth.currentUser.id ? `<button class="danger delete-song" data-id="${song.id}" style="margin-left:auto;">Sil</button>` : ''}
+    </div>
+  `;
+}
+
 async function loadPlaylist() {
   const listEl = document.getElementById('playlist-list');
 
   const { data: songs, error } = await supabaseClient
     .from('playlist_songs')
-    .select('id, song_name, song_url, author_name, author_id, created_at')
+    .select('id, song_name, song_url, theme, author_name, author_id, created_at')
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -153,42 +228,52 @@ async function loadPlaylist() {
     return;
   }
 
-  if (!songs || songs.length === 0) {
-    listEl.innerHTML = `<p class="muted">Henüz şarkı yok. İlk ekleyen sen ol!</p>`;
-    return;
-  }
+  const { data: profiles } = await supabaseClient
+    .from('profiles')
+    .select('player_name, avatar_url')
+    .in('player_name', ROSTER);
+  const avatarByPlayer = {};
+  (profiles || []).forEach(p => { if (p.player_name) avatarByPlayer[p.player_name] = p.avatar_url; });
 
-  listEl.innerHTML = songs.map(s => {
-    const date = new Date(s.created_at).toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' });
-    const canDelete = Civ6Auth.currentUser && s.author_id === Civ6Auth.currentUser.id;
-    const ytId = getYouTubeId(s.song_url);
+  const byPlayer = {};
+  ROSTER.forEach(name => { byPlayer[name] = {}; });
+  (songs || []).forEach(s => {
+    if (!byPlayer[s.author_name]) byPlayer[s.author_name] = {};
+    byPlayer[s.author_name][s.theme] = s;
+  });
 
-    let media = '';
-    if (ytId) {
-      media = `<a href="${escapeHtml(s.song_url)}" target="_blank" rel="noopener">
-        <img class="post-image" src="https://img.youtube.com/vi/${ytId}/mqdefault.jpg" alt="">
-      </a>`;
-    } else if (s.song_url) {
-      media = `<p><a href="${escapeHtml(s.song_url)}" target="_blank" rel="noopener">🔗 Dinle</a></p>`;
-    }
-
-    return `
-      <div class="post-card">
-        ${canDelete ? `<button class="delete-song" data-id="${s.id}">Sil</button>` : ''}
-        <h3>${escapeHtml(s.song_name)}</h3>
-        <div class="post-meta">${escapeHtml(s.author_name || 'Bilinmiyor')} tarafından eklendi · ${date}</div>
-        ${media}
-      </div>
-    `;
-  }).join('');
+  listEl.innerHTML = `
+    <div class="theme-roster">
+      ${Object.keys(byPlayer).map(name => {
+        const slots = byPlayer[name];
+        const avatar = Civ6Auth.avatarHtml(avatarByPlayer[name], 22);
+        return `
+          <div class="theme-player-card">
+            <h3>${avatar}${escapeHtml(name)}</h3>
+            <div class="theme-slot">
+              <div class="theme-slot-label">🗡️ Saldırı</div>
+              ${renderSongSlot(slots.saldiri)}
+            </div>
+            <div class="theme-slot">
+              <div class="theme-slot-label">🛡️ Direniş</div>
+              ${renderSongSlot(slots.direnis)}
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
 
   document.querySelectorAll('.delete-song').forEach(btn => {
     btn.addEventListener('click', async () => {
-      if (!confirm('Bu şarkı çalma listesinden kaldırılsın mı?')) return;
+      if (!confirm('Bu tema müziği kaldırılsın mı?')) return;
       await supabaseClient.from('playlist_songs').delete().eq('id', btn.dataset.id);
       loadPlaylist();
+      refreshComposeAvailability();
     });
   });
+
+  refreshComposeAvailability();
 }
 
 function escapeHtml(str) {

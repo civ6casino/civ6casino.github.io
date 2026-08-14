@@ -116,8 +116,11 @@ async function loadPosts() {
     return;
   }
 
+  const avatarMap = await Civ6Auth.fetchAvatars(posts.filter(p => !p.is_anonymous).map(p => p.author_id));
+
   listEl.innerHTML = posts.map(p => {
     const displayName = p.is_anonymous ? 'Anonim Vakanüvis' : escapeHtml(p.author_name || 'Bilinmiyor');
+    const avatar = p.is_anonymous ? Civ6Auth.avatarHtml(null) : Civ6Auth.avatarHtml(avatarMap[p.author_id]);
     const date = new Date(p.created_at).toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' });
     const canDelete = Civ6Auth.currentUser && (p.author_id === Civ6Auth.currentUser.id || Civ6Auth.isAdmin);
     const commentCount = (p.comments || []).length;
@@ -126,7 +129,7 @@ async function loadPosts() {
       <div class="post-card-compact">
         ${canDelete ? `<div class="card-actions"><button type="button" class="danger delete-post" data-id="${p.id}">Sil</button></div>` : ''}
         <h3><a href="yazi.html?id=${p.id}">${escapeHtml(p.title)}</a></h3>
-        <div class="post-meta">${displayName} tarafından · ${date} <a class="pill" href="yazi.html?id=${p.id}">💬 ${commentCount} yanıt</a></div>
+        <div class="post-meta">${avatar}${displayName} tarafından · ${date} <a class="pill" href="yazi.html?id=${p.id}">💬 ${commentCount} yanıt</a></div>
         <p class="post-excerpt">${escapeHtml(excerptOf(p.body))}</p>
       </div>
     `;
