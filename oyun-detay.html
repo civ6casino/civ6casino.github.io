@@ -61,11 +61,6 @@
     <div id="game-info" class="muted">Yükleniyor...</div>
   </section>
 
-  <section class="panel" id="gallery-panel" style="display:none;">
-    <h2>🖼️ Fotoğraflar</h2>
-    <div id="gallery-list"></div>
-  </section>
-
   <section class="panel" id="poll-panel" style="display:none;">
     <h2>🗳️ Anket</h2>
     <div id="poll-body"></div>
@@ -202,8 +197,10 @@ async function loadGame() {
 
   const images = g.game_images || [];
   if (images.length > 0) {
-    document.getElementById('gallery-panel').style.display = 'block';
-    document.getElementById('gallery-list').innerHTML = images.map(img => `<img class="post-image" src="${img.image_url}" alt="">`).join('');
+    const heroEl = document.getElementById('hero-banner');
+    heroEl.classList.add('hero-photo');
+    heroEl.style.backgroundImage = `url('${images[0].image_url}')`;
+    heroEl.insertAdjacentHTML('afterend', '<div class="hero-fade-mask" aria-hidden="true"></div>');
   }
 
   await loadPoll();

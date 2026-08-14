@@ -51,52 +51,82 @@
 <div class="hero-fade-mask" aria-hidden="true"></div>
 
 <main>
-  <section class="panel">
-    <h2>⚖️ Puanlama Kuralları</h2>
-    <p class="muted">Puanlar, her oyunun sonunda elde edilen nihai sıralamaya göre verilir. Sıralama şu şekilde belirlenir:</p>
-    <ul class="house-rules">
-      <li><strong>1. sırayı</strong>, oyunda zafer koşulunu sağlayan oyuncu alır. Bu oyuncunun oyun içi skorunun yüksekliğinin bir önemi yoktur, zaferi kazanmış olması yeterlidir.</li>
-      <li>Kalan oyuncuların sıralaması, oyunun bitişindeki <strong>oyun içi skorlarına</strong> göre belirlenir: en yüksek skora sahip oyuncu 2. sırayı, bir sonraki en yüksek skora sahip oyuncu 3. sırayı alır ve bu şekilde devam eder.</li>
-      <li>Ancak oyun sırasında <strong>elenen</strong> oyuncular bu skor sıralamasının dışında tutulur. Elenen oyuncular, hayatta kalan tüm oyunculardan sonra sıralanır ve kendi aralarındaki sıralama <strong>elenme sırasına</strong> göre belirlenir: en son elenen oyuncu, elenenler arasında en iyi sırayı alır; ilk elenen oyuncu ise en düşük sırada yer alır.</li>
-    </ul>
-    <table>
-      <thead><tr><th>Sıra</th><th>Puan</th></tr></thead>
-      <tbody>
-        <tr><td>1. sıra</td><td>7</td></tr>
-        <tr><td>2. sıra</td><td>3</td></tr>
-        <tr><td>3. sıra</td><td>3</td></tr>
-        <tr><td>4. sıra</td><td>2</td></tr>
-        <tr><td>5. sıra</td><td>1</td></tr>
-        <tr><td>6. sıra</td><td>1</td></tr>
-      </tbody>
-    </table>
-  </section>
+  <div class="tab-row" id="rules-tab-row">
+    <button type="button" class="tab-btn" data-tab="puanlama">⚖️ Puanlama</button>
+    <button type="button" class="tab-btn inactive" data-tab="rozet">🏅 Rozetler</button>
+    <button type="button" class="tab-btn inactive" data-tab="ozel">🏺 Özel Kurallar</button>
+  </div>
 
-  <section class="panel">
-    <h2>🏅 Rozet Kuralları</h2>
-    <p class="muted">Bir oyun tamamlandıktan sonra, o oyundaki öne çıkan performanslara özel rozetler verilebilir. Her rozetin bonus puanı, rozeti alan oyuncunun Şeref Listesi'ndeki toplamına doğrudan eklenir. Bir rozet tek bir oyunda en fazla bir oyuncuya verilebilir. Oyuncuların kazandığı tüm rozetler kendi profil sayfalarında ve Oyun Tarihi'ndeki ilgili oyunun altında listelenir.</p>
-    <ul class="house-rules" id="badges-rules-list">
-      <li class="muted">Yükleniyor...</li>
-    </ul>
-  </section>
+  <div class="tab-panel" id="tabpanel-puanlama">
+    <section class="panel">
+      <h2>⚖️ Puanlama Kuralları</h2>
+      <p class="muted">Puanlar, her oyunun sonunda elde edilen nihai sıralamaya göre verilir. Sıralama şu şekilde belirlenir:</p>
+      <ul class="house-rules">
+        <li><strong>1. sırayı</strong>, oyunda zafer koşulunu sağlayan oyuncu alır. Bu oyuncunun oyun içi skorunun yüksekliğinin bir önemi yoktur, zaferi kazanmış olması yeterlidir.</li>
+        <li>Kalan oyuncuların sıralaması, oyunun bitişindeki <strong>oyun içi skorlarına</strong> göre belirlenir: en yüksek skora sahip oyuncu 2. sırayı, bir sonraki en yüksek skora sahip oyuncu 3. sırayı alır ve bu şekilde devam eder.</li>
+        <li>Ancak oyun sırasında <strong>elenen</strong> oyuncular bu skor sıralamasının dışında tutulur. Elenen oyuncular, hayatta kalan tüm oyunculardan sonra sıralanır ve kendi aralarındaki sıralama <strong>elenme sırasına</strong> göre belirlenir: en son elenen oyuncu, elenenler arasında en iyi sırayı alır; ilk elenen oyuncu ise en düşük sırada yer alır.</li>
+      </ul>
+      <table>
+        <thead><tr><th>Sıra</th><th>Puan</th></tr></thead>
+        <tbody>
+          <tr><td>1. sıra</td><td>7</td></tr>
+          <tr><td>2. sıra</td><td>3</td></tr>
+          <tr><td>3. sıra</td><td>3</td></tr>
+          <tr><td>4. sıra</td><td>2</td></tr>
+          <tr><td>5. sıra</td><td>1</td></tr>
+          <tr><td>6. sıra</td><td>1</td></tr>
+        </tbody>
+      </table>
+    </section>
+  </div>
 
-  <section class="panel">
-    <h2>🏺 Özel Kurallar</h2>
-    <ul class="house-rules">
-      <li>Oyuncular kendi kurdukları şehirleri diğer oyunculara veremezler.</li>
-      <li>Oyuncular başka bir oyuncuya kasıtlı olarak birinciliği salamaz.</li>
-      <li>Savaşta olmayan bir oyuncu, halihazırda bir savaşı sabote etmek için birimlerini geçiş engellemek amacıyla kullanamaz.</li>
-      <li>Sözlü ateşkes anlaşmasına iki taraf da uymakla yükümlüdür.</li>
-      <li>Taraflardan talep eden olursa savaş başlangıcında tarafsız bir millet pause atar.</li>
-      <li>Tur süresinin son anlarını, rakibin hamle yapmasını engellemek veya onu zamana sıkıştırmak amacıyla kullanmak yasaktır.</li>
-    </ul>
-  </section>
+  <div class="tab-panel" id="tabpanel-rozet" style="display:none;">
+    <section class="panel">
+      <h2>🏅 Rozet Kuralları</h2>
+      <p class="muted">Bir oyun tamamlandıktan sonra, o oyundaki öne çıkan performanslara özel rozetler verilebilir. Her rozetin bonus puanı, rozeti alan oyuncunun Şeref Listesi'ndeki toplamına doğrudan eklenir. Bir rozet tek bir oyunda en fazla bir oyuncuya verilebilir. Oyuncuların kazandığı tüm rozetler kendi profil sayfalarında ve Oyun Tarihi'ndeki ilgili oyunun altında listelenir.</p>
+      <ul class="house-rules" id="badges-rules-list">
+        <li class="muted">Yükleniyor...</li>
+      </ul>
+    </section>
+  </div>
+
+  <div class="tab-panel" id="tabpanel-ozel" style="display:none;">
+    <section class="panel">
+      <h2>🏺 Özel Kurallar</h2>
+      <ul class="house-rules">
+        <li>Oyuncular kendi kurdukları şehirleri diğer oyunculara veremezler.</li>
+        <li>Oyuncular başka bir oyuncuya kasıtlı olarak birinciliği salamaz.</li>
+        <li>Savaşta olmayan bir oyuncu, halihazırda bir savaşı sabote etmek için birimlerini geçiş engellemek amacıyla kullanamaz.</li>
+        <li>Sözlü ateşkes anlaşmasına iki taraf da uymakla yükümlüdür.</li>
+        <li>Taraflardan talep eden olursa savaş başlangıcında tarafsız bir millet pause atar.</li>
+        <li>Tur süresinin son anlarını, rakibin hamle yapmasını engellemek veya onu zamana sıkıştırmak amacıyla kullanmak yasaktır.</li>
+      </ul>
+    </section>
+  </div>
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script src="auth.js"></script>
 <script>
+function activateTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('inactive', b.dataset.tab !== tab));
+  document.querySelectorAll('.tab-panel').forEach(p => {
+    p.style.display = p.id === `tabpanel-${tab}` ? 'block' : 'none';
+  });
+}
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    activateTab(btn.dataset.tab);
+    history.replaceState(null, '', `#${btn.dataset.tab}`);
+  });
+});
+
+const validTabs = ['puanlama', 'rozet', 'ozel'];
+const requestedTab = location.hash.replace('#', '');
+activateTab(validTabs.includes(requestedTab) ? requestedTab : 'puanlama');
+
 async function loadBadgeRules() {
   const listEl = document.getElementById('badges-rules-list');
 
