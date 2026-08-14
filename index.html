@@ -232,7 +232,7 @@ async function loadEntries() {
     return `
       <div class="entry-card">
         ${canDelete ? `<div class="card-actions"><button class="danger entry-delete-btn" data-id="${e.id}">Sil</button></div>` : ''}
-        <div class="entry-meta">${Civ6Auth.avatarHtml(avatarMap[e.author_id])}${escapeHtml(e.author_name || 'Bilinmiyor')} · ${date} ${gameTag}</div>
+        <div class="entry-meta">${Civ6Auth.authorLinkHtml(e.author_name, avatarMap[e.author_id])} · ${date} ${gameTag}</div>
         <div class="entry-body">${escapeHtml(e.body)}</div>
       </div>
     `;

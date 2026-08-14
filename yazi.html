@@ -205,10 +205,10 @@ function renderPost() {
   document.getElementById('post-title-heading').textContent = p.title;
 
   const displayName = p.is_anonymous ? 'Anonim Vakanüvis' : (p.author_name || 'Bilinmiyor');
-  const avatar = p.is_anonymous ? '' : Civ6Auth.avatarHtml(postAuthorAvatarUrl);
+  const authorLink = Civ6Auth.authorLinkHtml(p.is_anonymous ? null : p.author_name, postAuthorAvatarUrl, { label: p.is_anonymous ? 'Anonim Vakanüvis' : undefined });
   const date = new Date(p.created_at).toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' });
   const gameTag = p.games ? ` · 🎮 <a href="oyun-detay.html?id=${p.game_id}">${escapeHtml(gameLabel(p.games))}</a>` : '';
-  document.getElementById('post-subtitle').innerHTML = `${avatar}${escapeHtml(displayName)} tarafından · ${date}${gameTag}`;
+  document.getElementById('post-subtitle').innerHTML = `${authorLink} tarafından · ${date}${gameTag}`;
 
   const canEdit = Civ6Auth.currentUser && (p.author_id === Civ6Auth.currentUser.id || Civ6Auth.isAdmin);
   document.getElementById('post-actions').innerHTML = canEdit ? `
@@ -357,14 +357,13 @@ async function loadComments() {
   const avatarMap = await Civ6Auth.fetchAvatars(comments.filter(c => !c.is_anonymous).map(c => c.author_id));
 
   listEl.innerHTML = comments.map(c => {
-    const displayName = c.is_anonymous ? 'Anonim Yorumcu' : escapeHtml(c.author_name || 'Bilinmiyor');
-    const avatar = c.is_anonymous ? Civ6Auth.avatarHtml(null) : Civ6Auth.avatarHtml(avatarMap[c.author_id]);
+    const authorLink = Civ6Auth.authorLinkHtml(c.is_anonymous ? null : c.author_name, avatarMap[c.author_id], { label: c.is_anonymous ? 'Anonim Yorumcu' : undefined, bold: true });
     const date = new Date(c.created_at).toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' });
     const canDelete = Civ6Auth.currentUser && (c.author_id === Civ6Auth.currentUser.id || Civ6Auth.isAdmin);
     return `
       <div class="comment-row">
         <div class="comment-meta">
-          ${avatar}<strong>${displayName}</strong> <span class="muted">· ${date}</span>
+          ${authorLink} <span class="muted">· ${date}</span>
           ${canDelete ? `<button type="button" class="danger delete-comment-btn" data-id="${c.id}">Sil</button>` : ''}
         </div>
         <div class="comment-body">${escapeHtml(c.body)}</div>

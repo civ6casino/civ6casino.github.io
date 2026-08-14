@@ -299,12 +299,23 @@ const Civ6Auth = (() => {
     return `<span class="avatar-icon avatar-placeholder" style="width:${size}px;height:${size}px;font-size:${Math.round(size * 0.55)}px;">👤</span>`;
   }
 
+  function authorLinkHtml(name, avatarUrl, opts) {
+    opts = opts || {};
+    const size = opts.size || 26;
+    const label = opts.label ? opts.label : escapeHtml(name || 'Bilinmiyor');
+    const inner = opts.bold ? `<strong>${label}</strong>` : label;
+    const avatar = avatarHtml(avatarUrl, size);
+    if (!name) return `${avatar}${inner}`;
+    return `<a class="author-link" href="profil.html?oyuncu=${encodeURIComponent(name)}">${avatar}${inner}</a>`;
+  }
+
   return {
     refresh,
     onChange,
     logout,
     fetchAvatars,
     avatarHtml,
+    authorLinkHtml,
     get currentUser() { return currentUser; },
     get currentUsername() { return currentUsername; },
     get pendingUsername() { return pendingUsername; },

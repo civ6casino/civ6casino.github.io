@@ -246,10 +246,10 @@ async function loadPlaylist() {
     <div class="theme-roster">
       ${Object.keys(byPlayer).map(name => {
         const slots = byPlayer[name];
-        const avatar = Civ6Auth.avatarHtml(avatarByPlayer[name], 22);
+        const authorLink = Civ6Auth.authorLinkHtml(name, avatarByPlayer[name], { size: 22 });
         return `
           <div class="theme-player-card">
-            <h3>${avatar}${escapeHtml(name)}</h3>
+            <h3>${authorLink}</h3>
             <div class="theme-slot">
               <div class="theme-slot-label">🗡️ Saldırı</div>
               ${renderSongSlot(slots.saldiri)}

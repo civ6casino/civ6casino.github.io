@@ -150,8 +150,7 @@ async function loadVakayiname() {
   const avatarMap = await Civ6Auth.fetchAvatars(posts.filter(p => !p.is_anonymous).map(p => p.author_id));
 
   listEl.innerHTML = posts.map(p => {
-    const displayName = p.is_anonymous ? 'Anonim Vakanüvis' : escapeHtml(p.author_name || 'Bilinmiyor');
-    const avatar = p.is_anonymous ? Civ6Auth.avatarHtml(null) : Civ6Auth.avatarHtml(avatarMap[p.author_id]);
+    const authorLink = Civ6Auth.authorLinkHtml(p.is_anonymous ? null : p.author_name, avatarMap[p.author_id], { label: p.is_anonymous ? 'Anonim Vakanüvis' : undefined });
     const date = new Date(p.created_at).toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' });
     const commentCount = (p.comments || []).length;
     const gameTag = p.games
@@ -161,7 +160,7 @@ async function loadVakayiname() {
     return `
       <div class="post-card-compact">
         <h3><a href="yazi.html?id=${p.id}">${escapeHtml(p.title)}</a></h3>
-        <div class="post-meta">${avatar}${displayName} tarafından · ${date} ${gameTag} <a class="pill" href="yazi.html?id=${p.id}">💬 ${commentCount} yanıt</a></div>
+        <div class="post-meta">${authorLink} tarafından · ${date} ${gameTag} <a class="pill" href="yazi.html?id=${p.id}">💬 ${commentCount} yanıt</a></div>
         <p class="post-excerpt">${escapeHtml(excerptOf(p.body))}</p>
       </div>
     `;
