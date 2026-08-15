@@ -1298,6 +1298,45 @@ button.danger {
   margin-bottom: 0;
 }
 
+.pdf-doc-link {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin-top: 1.3rem;
+  padding: 0.9rem 1.1rem;
+  border: 1px solid var(--accent-dim);
+  border-radius: 8px;
+  background: rgba(212, 175, 90, 0.06);
+  text-decoration: none;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.pdf-doc-link:hover {
+  background: rgba(212, 175, 90, 0.12);
+  border-color: var(--accent);
+}
+
+.pdf-doc-icon {
+  font-size: 1.8rem;
+  flex-shrink: 0;
+}
+
+.pdf-doc-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.pdf-doc-text strong {
+  color: var(--accent);
+  font-family: "Cinzel", serif;
+  font-size: 1rem;
+}
+
+.pdf-doc-text .muted {
+  font-size: 0.82rem;
+}
+
 /* Meydan (entries feed) */
 #entry-body {
   min-height: 70px;
