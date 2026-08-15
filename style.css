@@ -317,6 +317,14 @@ tr.rank-3 td:nth-child(2) { color: var(--bronze); font-weight: 700; }
   padding: calc(clamp(50px, 10vh, 130px) + 92px) 1rem 2rem;
 }
 
+/* Scoped to the per-game hero (oyun-detay.html) only — a touch darker than
+   the site-wide hero photos, since this is a user-uploaded game screenshot
+   rather than a curated hero image, so leaning slightly darker keeps it
+   from fighting with the page content for attention. */
+.hero-banner.hero-photo.game-photo-hero {
+  filter: brightness(0.85);
+}
+
 .hero-banner.hero-photo::before {
   content: "";
   position: absolute;
@@ -730,6 +738,7 @@ button.danger {
   text-decoration: none;
   display: inline-flex;
   align-items: center;
+  vertical-align: middle;
 }
 
 .author-link:hover {

@@ -200,7 +200,7 @@ async function loadGame() {
   const images = g.game_images || [];
   if (images.length > 0) {
     const heroEl = document.getElementById('hero-banner');
-    heroEl.classList.add('hero-photo');
+    heroEl.classList.add('hero-photo', 'game-photo-hero');
     heroEl.style.backgroundImage = `url('${images[0].image_url}')`;
     heroEl.insertAdjacentHTML('afterend', '<div class="hero-fade-mask" aria-hidden="true"></div>');
   }
