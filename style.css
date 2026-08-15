@@ -152,6 +152,78 @@ nav a:hover, nav a.active {
   text-shadow: 0 1px 1px rgba(0,0,0,0.5);
 }
 
+.nav-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.nav-dropdown > a::before {
+  content: "▾";
+  display: inline-block;
+  margin-left: 0.35em;
+  font-size: 0.8em;
+  transition: transform 0.2s ease;
+}
+
+.nav-dropdown:hover > a::before,
+.nav-dropdown:focus-within > a::before {
+  transform: translateY(1px) rotate(180deg);
+}
+
+.nav-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 50%;
+  transform: translate(-50%, -8px);
+  min-width: 190px;
+  padding: 0.5rem;
+  background: linear-gradient(180deg, var(--panel2), var(--panel));
+  border: 1px solid var(--accent-dim);
+  border-radius: 8px;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.45);
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
+  z-index: 30;
+}
+
+.nav-dropdown-menu::before {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-bottom-color: var(--accent-dim);
+}
+
+.nav-dropdown:hover .nav-dropdown-menu,
+.nav-dropdown:focus-within .nav-dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translate(-50%, 0);
+}
+
+.nav-dropdown-menu a {
+  margin-left: 0 !important;
+  text-transform: none !important;
+  letter-spacing: 0.01em !important;
+  font-size: 0.88rem !important;
+  text-align: left;
+  border-radius: 5px;
+  white-space: nowrap;
+}
+
+.nav-dropdown-menu a:hover {
+  background: rgba(212, 175, 90, 0.12);
+  color: var(--accent);
+}
+
 /* Bridges the hard edge where the hero's own clipped background (photo +
    fade overlay) ends and the page's own background begins. Two problems
    compound here: (1) the hero's fade is flat while the page has a faint
