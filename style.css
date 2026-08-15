@@ -382,7 +382,7 @@ tr.rank-3 td:nth-child(2) { color: var(--bronze); font-weight: 700; }
 .hero-banner.hero-photo {
   background-size: cover;
   background-position: center 62.5%;
-  min-height: 98vh;
+  min-height: 107.8vh;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -448,7 +448,7 @@ tr.rank-3 td:nth-child(2) { color: var(--bronze); font-weight: 700; }
 
 @media (max-width: 560px) {
   .hero-banner.hero-photo {
-    min-height: 78.75vh;
+    min-height: 86.625vh;
     padding-top: calc(clamp(40px, 8vh, 90px) + 130px);
   }
   .hero-banner:not(.hero-photo) {
