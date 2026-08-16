@@ -245,7 +245,7 @@ async function loadStats() {
 
   const { data: results, error } = await supabaseClient
     .from('results')
-    .select('rank, points, games!inner(ranked, status)')
+    .select('rank, points, civilization, games!inner(ranked, status)')
     .eq('player_name', playerName)
     .eq('games.ranked', true)
     .eq('games.status', 'completed');
@@ -273,6 +273,15 @@ async function loadStats() {
   const wins = results.filter(r => r.rank === 1).length;
   const winRate = (wins / totalGames) * 100;
 
+  const civCounts = {};
+  results.forEach(r => {
+    if (r.civilization) civCounts[r.civilization] = (civCounts[r.civilization] || 0) + 1;
+  });
+  const civEntries = Object.entries(civCounts).sort((a, b) => b[1] - a[1]);
+  const distinctCivs = civEntries.length;
+  const favoriteCiv = civEntries.length ? `${civEntries[0][0]} (${civEntries[0][1]}x)` : '—';
+  const civList = civEntries.length ? civEntries.map(([c, n]) => `${c}${n > 1 ? ` ×${n}` : ''}`).join(', ') : 'Henüz kaydedilmedi';
+
   const rows = [
     ['🎮 Oynanan Oyun', totalGames],
     ['🥇 Ortalama Sıralama', `${avgRank.toFixed(2)}. sıra`],
@@ -281,6 +290,8 @@ async function loadStats() {
     ['⭐ Toplam Puan', formatPoints(totalPoints)],
     ['📊 Ortalama Puan / Oyun', formatPoints(totalPoints / totalGames)],
     ['🏅 Kazanılan Rozet', badgeCount || 0],
+    ['🌍 Farklı Medeniyet', distinctCivs],
+    ['❤️ En Sık Oynanan', favoriteCiv],
   ];
 
   el.innerHTML = `
@@ -289,7 +300,8 @@ async function loadStats() {
         ${rows.map(([label, value]) => `<tr><td>${label}</td><td><strong>${value}</strong></td></tr>`).join('')}
       </tbody>
     </table>
-    <p class="muted" style="margin-top:0.8rem; font-size:0.85rem;">Yalnızca dereceli ve tamamlanmış oyunlar sayılır. Oynanan medeniyetler henüz kaydedilmiyor — istersen bunu takip etmeye başlamak için oyun bitirme formuna bir alan ekleyebiliriz.</p>
+    <p class="muted" style="margin-top:0.8rem; font-size:0.85rem;">Oynanan medeniyetler: ${civList}</p>
+    <p class="muted" style="margin-top:0.4rem; font-size:0.8rem;">Yalnızca dereceli ve tamamlanmış oyunlar sayılır.</p>
   `;
 }
 

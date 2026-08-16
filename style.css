@@ -1087,6 +1087,19 @@ button.danger {
 .checkbox-row input { width: auto; }
 .checkbox-row label { margin: 0; text-transform: none; letter-spacing: 0; color: var(--text); }
 
+.finish-rank-row {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.finish-rank-row .finish-rank {
+  flex: 1.2;
+}
+
+.finish-rank-row .finish-civ {
+  flex: 1;
+}
+
 .pill {
   display: inline-block;
   padding: 0.15rem 0.6rem;

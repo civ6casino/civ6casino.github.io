@@ -410,10 +410,13 @@ function openFinishForm(gameId) {
   formEl.innerHTML = `
     ${RANK_LABELS.map((label, i) => `
       <label>${label} sıra (${RANK_POINTS[i]} puan)</label>
-      <select class="finish-rank" data-rank="${i}">
-        <option value="">— Seç —</option>
-        ${ROSTER.map(p => `<option value="${p}">${p}</option>`).join('')}
-      </select>
+      <div class="finish-rank-row">
+        <select class="finish-rank" data-rank="${i}">
+          <option value="">— Seç —</option>
+          ${ROSTER.map(p => `<option value="${p}">${p}</option>`).join('')}
+        </select>
+        <input type="text" class="finish-civ" data-rank="${i}" placeholder="Medeniyet (örn. Kore)">
+      </div>
     `).join('')}
     <label>Öne Çıkanlar &amp; Detaylı Tarihçe</label>
     <textarea class="finish-highlights" placeholder="Ne oldu? Önemli anlar, ihanetler, geri dönüşler, nihai skorlar..."></textarea>
@@ -446,7 +449,9 @@ async function submitFinishForm(gameId, formEl) {
     if (name) {
       if (selected.includes(name)) duplicate = true;
       selected.push(name);
-      entries.push({ player_name: name, rank: rank + 1, points: RANK_POINTS[rank], game_id: gameId });
+      const civInput = formEl.querySelector(`.finish-civ[data-rank="${rank}"]`);
+      const civilization = civInput ? civInput.value.trim() : '';
+      entries.push({ player_name: name, rank: rank + 1, points: RANK_POINTS[rank], game_id: gameId, civilization: civilization || null });
     }
   });
 
@@ -506,7 +511,7 @@ async function loadManageList() {
   const listEl = document.getElementById('manage-list');
   const { data: games, error } = await supabaseClient
     .from('games')
-    .select('id, played_on, name, description, info_text, highlights, note, victory_type, ranked, poll_closed, badges_finalized, cover_image_url, results(player_name, rank, points), game_images(image_url), game_badges(badge_id, player_name, badges(name, icon, points))')
+    .select('id, played_on, name, description, info_text, highlights, note, victory_type, ranked, poll_closed, badges_finalized, cover_image_url, results(player_name, rank, points, civilization), game_images(image_url), game_badges(badge_id, player_name, badges(name, icon, points))')
     .eq('status', 'completed')
     .order('created_at', { ascending: false });
 
@@ -543,7 +548,7 @@ async function loadManageList() {
         <h3 style="margin:0.3rem 0;"><a href="oyun-detay.html?id=${g.id}">${escapeHtml(title)}</a></h3>
         ${g.description ? `<p class="muted">${escapeHtml(g.description)}</p>` : ''}
         <ol>
-          ${sorted.map(r => `<li>${escapeHtml(r.player_name)} — ${r.points} puan</li>`).join('')}
+          ${sorted.map(r => `<li>${escapeHtml(r.player_name)}${r.civilization ? ` (${escapeHtml(r.civilization)})` : ''} — ${r.points} puan</li>`).join('')}
         </ol>
         ${awarded.length ? `<p class="muted">${awarded.map(a => `${escapeHtml(a.badges?.icon || '🏅')} ${escapeHtml(a.badges?.name || '')}: ${escapeHtml(a.player_name)}`).join(' · ')}</p>` : ''}
         ${g.highlights ? `<p>${escapeHtml(g.highlights)}</p>` : ''}

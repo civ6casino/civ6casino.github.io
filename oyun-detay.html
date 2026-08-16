@@ -168,7 +168,7 @@ async function loadGame() {
 
   const { data: g, error } = await supabaseClient
     .from('games')
-    .select('id, played_on, name, description, info_text, highlights, note, status, ranked, poll_closed, badges_finalized, victory_type, cover_image_url, results(player_name, rank, points), game_images(image_url), game_badges(player_name, badges(name, icon, points))')
+    .select('id, played_on, name, description, info_text, highlights, note, status, ranked, poll_closed, badges_finalized, victory_type, cover_image_url, results(player_name, rank, points, civilization), game_images(image_url), game_badges(player_name, badges(name, icon, points))')
     .eq('id', gameId)
     .maybeSingle();
 
@@ -214,7 +214,7 @@ async function loadGame() {
   infoEl.innerHTML = `
     ${g.victory_type ? `<p><span class="pill">${VICTORY_ICONS[g.victory_type] || '🏆'} ${escapeHtml(g.victory_type)}</span></p>` : ''}
     ${g.description ? `<p>${escapeHtml(g.description)}</p>` : ''}
-    ${sortedResults.length ? `<ol>${sortedResults.map(r => `<li>${escapeHtml(r.player_name)} — ${r.points} puan</li>`).join('')}</ol>` : '<p class="muted">Henüz sonuç girilmedi.</p>'}
+    ${sortedResults.length ? `<ol>${sortedResults.map(r => `<li>${escapeHtml(r.player_name)}${r.civilization ? ` (${escapeHtml(r.civilization)})` : ''} — ${r.points} puan</li>`).join('')}</ol>` : '<p class="muted">Henüz sonuç girilmedi.</p>'}
     ${awardedBadges.length ? `
       <p class="muted">${awardedBadges.map(a => `${escapeHtml(a.badges.icon || '🏅')} <a href="profil.html?oyuncu=${encodeURIComponent(a.player_name)}">${escapeHtml(a.player_name)}</a>: ${escapeHtml(a.badges.name)}${a.badges.points ? ` (${a.badges.points > 0 ? '+' : ''}${formatPoints(a.badges.points)} puan)` : ''}`).join(' · ')}</p>
     ` : ''}
