@@ -909,9 +909,15 @@ async function submitPost(gameId, formEl) {
     }
   }
 
+  if (!Civ6Auth.playerName) {
+    msgEl.textContent = 'Hesabın bir oyuncuya bağlı değil, yönetici panelinden bağlanman gerekiyor.';
+    msgEl.className = 'error';
+    return;
+  }
+
   const { error: insertErr } = await supabaseClient.from('posts').insert({
     author_id: Civ6Auth.currentUser.id,
-    author_name: Civ6Auth.currentUsername,
+    author_name: Civ6Auth.playerName,
     is_anonymous: isAnonymous,
     title,
     body,

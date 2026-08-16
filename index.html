@@ -194,11 +194,17 @@ document.getElementById('entry-submit-btn').addEventListener('click', async () =
     return;
   }
 
+  if (!Civ6Auth.playerName) {
+    msgEl.textContent = 'Hesabın bir oyuncuya bağlı değil, yönetici ile iletişime geç.';
+    msgEl.className = 'error';
+    return;
+  }
+
   const gameId = entryGameSelect.value || null;
 
   const { error } = await supabaseClient.from('entries').insert({
     author_id: Civ6Auth.currentUser.id,
-    author_name: Civ6Auth.currentUsername,
+    author_name: Civ6Auth.playerName,
     body,
     game_id: gameId
   });

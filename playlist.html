@@ -176,9 +176,15 @@ document.getElementById('song-submit-btn').addEventListener('click', async () =>
     return;
   }
 
+  if (!Civ6Auth.playerName) {
+    msgEl.textContent = 'Hesabın bir oyuncuya bağlı değil, yönetici ile iletişime geç.';
+    msgEl.className = 'error';
+    return;
+  }
+
   const { error } = await supabaseClient.from('playlist_songs').insert({
     author_id: Civ6Auth.currentUser.id,
-    author_name: Civ6Auth.currentUsername,
+    author_name: Civ6Auth.playerName,
     song_name: songName,
     song_url: songUrl,
     theme
