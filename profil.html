@@ -121,44 +121,42 @@ function renderAvatarBlock(avatarUrl) {
   const el = document.getElementById('profile-avatar-block');
   const isOwnProfile = !!(Civ6Auth.currentUser && linkedProfileId === Civ6Auth.currentUser.id);
 
+  if (!isOwnProfile) {
+    el.innerHTML = '';
+    return;
+  }
+
   el.innerHTML = `
-    ${Civ6Auth.avatarHtml(avatarUrl, 84)}
-    ${isOwnProfile ? `
-      <div>
-        <label for="avatar-file" style="margin:0 0 0.3rem;">Profil Fotoğrafı</label>
-        <input type="file" id="avatar-file" accept="image/*">
-        <div id="avatar-msg" class="muted" style="margin-top:0.3rem;"></div>
-      </div>
-    ` : ''}
+    <label for="avatar-file" style="margin:0 0 0.3rem;">Profil Fotoğrafını Değiştir</label>
+    <input type="file" id="avatar-file" accept="image/*">
+    <div id="avatar-msg" class="muted" style="margin-top:0.3rem;"></div>
   `;
 
-  if (isOwnProfile) {
-    document.getElementById('avatar-file').addEventListener('change', async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      const msgEl = document.getElementById('avatar-msg');
-      msgEl.textContent = 'Yükleniyor...';
-      msgEl.className = 'muted';
+  document.getElementById('avatar-file').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const msgEl = document.getElementById('avatar-msg');
+    msgEl.textContent = 'Yükleniyor...';
+    msgEl.className = 'muted';
 
-      const path = `${Civ6Auth.currentUser.id}/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9_.-]/g, '_')}`;
-      const { error: uploadErr } = await supabaseClient.storage.from('avatars').upload(path, file);
-      if (uploadErr) {
-        msgEl.textContent = 'Yüklenemedi: ' + uploadErr.message;
-        msgEl.className = 'error';
-        return;
-      }
-      const { data: pub } = supabaseClient.storage.from('avatars').getPublicUrl(path);
-      const { error: updErr } = await supabaseClient.from('profiles').update({ avatar_url: pub.publicUrl }).eq('id', Civ6Auth.currentUser.id);
-      if (updErr) {
-        msgEl.textContent = 'Kaydedilemedi: ' + updErr.message;
-        msgEl.className = 'error';
-        return;
-      }
-      msgEl.textContent = 'Profil fotoğrafı güncellendi!';
-      msgEl.className = 'success';
-      renderAvatarBlock(pub.publicUrl);
-    });
-  }
+    const path = `${Civ6Auth.currentUser.id}/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9_.-]/g, '_')}`;
+    const { error: uploadErr } = await supabaseClient.storage.from('avatars').upload(path, file);
+    if (uploadErr) {
+      msgEl.textContent = 'Yüklenemedi: ' + uploadErr.message;
+      msgEl.className = 'error';
+      return;
+    }
+    const { data: pub } = supabaseClient.storage.from('avatars').getPublicUrl(path);
+    const { error: updErr } = await supabaseClient.from('profiles').update({ avatar_url: pub.publicUrl }).eq('id', Civ6Auth.currentUser.id);
+    if (updErr) {
+      msgEl.textContent = 'Kaydedilemedi: ' + updErr.message;
+      msgEl.className = 'error';
+      return;
+    }
+    msgEl.textContent = 'Profil fotoğrafı güncellendi!';
+    msgEl.className = 'success';
+    renderAvatarBlock(pub.publicUrl);
+  });
 }
 
 async function loadThemeSongs() {

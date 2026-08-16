@@ -513,12 +513,12 @@ tr.rank-3 td:nth-child(2) { color: var(--bronze); font-weight: 700; }
 }
 
 .hero-banner .crest-photo {
-  width: 108px;
-  height: 108px;
+  width: 72px;
+  height: 72px;
   border-radius: 50%;
   object-fit: cover;
   border: 3px solid var(--accent);
-  box-shadow: 0 0 22px var(--gold-glow), 0 0 4px rgba(0,0,0,0.6);
+  box-shadow: 0 0 16px var(--gold-glow), 0 0 4px rgba(0,0,0,0.6);
   display: block;
 }
 
@@ -746,19 +746,7 @@ button.danger {
 }
 
 .profile-avatar-block {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
   margin-bottom: 1rem;
-}
-
-.profile-avatar-block .avatar-icon,
-.profile-avatar-block .avatar-placeholder {
-  width: 84px;
-  height: 84px;
-  font-size: 2.2rem;
-  margin-right: 0;
-  border-width: 2px;
 }
 
 .theme-roster {
