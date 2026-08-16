@@ -513,12 +513,12 @@ tr.rank-3 td:nth-child(2) { color: var(--bronze); font-weight: 700; }
 }
 
 .hero-banner .crest-photo {
-  width: 72px;
-  height: 72px;
+  width: 216px;
+  height: 216px;
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid var(--accent);
-  box-shadow: 0 0 16px var(--gold-glow), 0 0 4px rgba(0,0,0,0.6);
+  border: 4px solid var(--accent);
+  box-shadow: 0 0 30px var(--gold-glow), 0 0 6px rgba(0,0,0,0.6);
   display: block;
 }
 
@@ -793,6 +793,17 @@ button.danger {
   display: flex;
   align-items: center;
   gap: 0.6rem;
+}
+
+.theme-slot-song a,
+.theme-slot-song a:visited {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.theme-slot-song a:hover {
+  color: #e2c377;
+  text-decoration: underline;
 }
 
 .theme-slot img.theme-thumb {
