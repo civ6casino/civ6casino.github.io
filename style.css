@@ -512,6 +512,16 @@ tr.rank-3 td:nth-child(2) { color: var(--bronze); font-weight: 700; }
   filter: drop-shadow(0 0 14px var(--gold-glow));
 }
 
+.hero-banner .crest-photo {
+  width: 108px;
+  height: 108px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--accent);
+  box-shadow: 0 0 22px var(--gold-glow), 0 0 4px rgba(0,0,0,0.6);
+  display: block;
+}
+
 .hero-banner h1 {
   font-size: clamp(2.2rem, 3.6vw, 3rem);
   color: var(--accent);
