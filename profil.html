@@ -60,13 +60,16 @@
     </svg>
   </div>
   <h1 id="player-name-heading">Yükleniyor...</h1>
-  <p id="player-subtitle" class="muted"></p>
 </div>
 
 <main>
   <section class="panel">
     <div class="profile-avatar-block" id="profile-avatar-block"></div>
-    <p class="muted">Bu kahramanın hikayesi henüz yazılmadı. Yakında burada oyuncunun istatistikleri, favori medeniyetleri ve daha fazlası yer alacak.</p>
+  </section>
+
+  <section class="panel">
+    <h2>📊 İstatistikler</h2>
+    <div id="player-stats" class="muted">Yükleniyor...</div>
   </section>
 
   <section class="panel">
@@ -101,7 +104,6 @@ async function loadLinkedAccount() {
 
   if (profile) {
     linkedProfileId = profile.id;
-    document.getElementById('player-subtitle').textContent = `Bu kahramanı temsil eden üye: ${profile.username}`;
   }
 
   renderAvatarBlock(profile ? profile.avatar_url : null);
@@ -234,6 +236,63 @@ async function loadBadges() {
   }).join('');
 }
 
+async function loadStats() {
+  const el = document.getElementById('player-stats');
+  if (!playerName) {
+    el.innerHTML = `<p class="muted">Oyuncu belirtilmedi.</p>`;
+    return;
+  }
+
+  const { data: results, error } = await supabaseClient
+    .from('results')
+    .select('rank, points, games!inner(ranked, status)')
+    .eq('player_name', playerName)
+    .eq('games.ranked', true)
+    .eq('games.status', 'completed');
+
+  if (error) {
+    el.innerHTML = `<p class="error">İstatistikler yüklenemedi.</p>`;
+    console.error(error);
+    return;
+  }
+
+  const { count: badgeCount } = await supabaseClient
+    .from('game_badges')
+    .select('id', { count: 'exact', head: true })
+    .eq('player_name', playerName);
+
+  const totalGames = (results || []).length;
+
+  if (totalGames === 0) {
+    el.innerHTML = `<p class="muted">Bu kahraman henüz dereceli ve tamamlanmış bir oyuna katılmadı.</p>`;
+    return;
+  }
+
+  const totalPoints = results.reduce((sum, r) => sum + Number(r.points), 0);
+  const avgRank = results.reduce((sum, r) => sum + Number(r.rank), 0) / totalGames;
+  const wins = results.filter(r => r.rank === 1).length;
+  const winRate = (wins / totalGames) * 100;
+
+  const rows = [
+    ['🎮 Oynanan Oyun', totalGames],
+    ['🥇 Ortalama Sıralama', `${avgRank.toFixed(2)}. sıra`],
+    ['🏆 Birincilik Sayısı', wins],
+    ['📈 Kazanma Oranı', `%${winRate.toFixed(0)}`],
+    ['⭐ Toplam Puan', formatPoints(totalPoints)],
+    ['📊 Ortalama Puan / Oyun', formatPoints(totalPoints / totalGames)],
+    ['🏅 Kazanılan Rozet', badgeCount || 0],
+  ];
+
+  el.innerHTML = `
+    <table>
+      <tbody>
+        ${rows.map(([label, value]) => `<tr><td>${label}</td><td><strong>${value}</strong></td></tr>`).join('')}
+      </tbody>
+    </table>
+    <p class="muted" style="margin-top:0.8rem; font-size:0.85rem;">Yalnızca dereceli ve tamamlanmış oyunlar sayılır. Oynanan medeniyetler henüz kaydedilmiyor — istersen bunu takip etmeye başlamak için oyun bitirme formuna bir alan ekleyebiliriz.</p>
+  `;
+}
+
 function formatPoints(n) {
   n = Number(n);
   return Number.isInteger(n) ? String(n) : n.toFixed(1);
@@ -250,6 +309,7 @@ Civ6Auth.onChange(() => {
 loadLinkedAccount();
 loadBadges();
 loadThemeSongs();
+loadStats();
 </script>
 </body>
 </html>

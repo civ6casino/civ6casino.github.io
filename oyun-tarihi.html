@@ -186,7 +186,7 @@ async function loadGames() {
 
   const { data: games, error } = await supabaseClient
     .from('games')
-    .select('id, played_on, name, description, highlights, note, status, ranked, results(player_name, rank, points), game_images(image_url), game_badges(player_name, badges(name, icon, points))')
+    .select('id, played_on, name, description, highlights, note, status, ranked, victory_type, results(player_name, rank, points), game_images(image_url), game_badges(player_name, badges(name, icon, points))')
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -222,9 +222,14 @@ async function loadGames() {
       : '<span class="pill dim">Derecesiz</span>';
     const relatedPosts = postsByGame[g.id] || [];
     const awardedBadges = (g.game_badges || []).filter(a => a.badges);
+    const VICTORY_ICONS = {
+      'Teslim': '🏳️', 'Bilim Zaferi': '🔬', 'Kültür Zaferi': '🎭',
+      'Din Zaferi': '⛪', 'Diplomasi Zaferi': '🕊️', 'Askeri Zafer': '⚔️'
+    };
+    const victoryPill = g.victory_type ? `<span class="pill">${VICTORY_ICONS[g.victory_type] || '🏆'} ${escapeHtml(g.victory_type)}</span>` : '';
     return `
       <div class="game-card" id="game-${g.id}">
-        <div class="date-info">${g.played_on} · ${statusPill} ${rankedPill}</div>
+        <div class="date-info">${g.played_on} · ${statusPill} ${rankedPill} ${victoryPill}</div>
         <h3 style="margin:0.3rem 0;"><a href="oyun-detay.html?id=${g.id}">${escapeHtml(title)}</a></h3>
         ${g.description ? `<p class="muted">${escapeHtml(g.description)}</p>` : ''}
         ${sortedResults.length ? `<ol>${sortedResults.map(r => `<li>${escapeHtml(r.player_name)} — ${r.points} puan</li>`).join('')}</ol>` : ''}

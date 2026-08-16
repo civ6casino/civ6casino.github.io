@@ -147,6 +147,7 @@
 const RANK_LABELS = ['1.', '2.', '3.', '4.', '5.', '6.'];
 const RANK_POINTS = [7, 3, 3, 2, 1, 1];
 const ROSTER = ['Yusuf', 'Eren', 'Arda', 'Alperen', 'Taha', 'Ayaz'];
+const VICTORY_TYPES = ['Teslim', 'Bilim Zaferi', 'Kültür Zaferi', 'Din Zaferi', 'Diplomasi Zaferi', 'Askeri Zafer'];
 
 const notLoggedInPanel = document.getElementById('not-logged-in-panel');
 const notAdminPanel = document.getElementById('not-admin-panel');
@@ -416,6 +417,11 @@ function openFinishForm(gameId) {
     `).join('')}
     <label>Öne Çıkanlar &amp; Detaylı Tarihçe</label>
     <textarea class="finish-highlights" placeholder="Ne oldu? Önemli anlar, ihanetler, geri dönüşler, nihai skorlar..."></textarea>
+    <label>Zafer Tipi</label>
+    <select class="finish-victory-type">
+      <option value="">— Seç —</option>
+      ${VICTORY_TYPES.map(v => `<option value="${v}">${v}</option>`).join('')}
+    </select>
     <label>Fotoğraflar (isteğe bağlı, birden fazla eklenebilir)</label>
     <input type="file" class="finish-photos" accept="image/*" multiple>
     <button class="finish-submit-btn" data-id="${gameId}">Kaydet &amp; Oyunu Tamamla</button>
@@ -457,6 +463,7 @@ async function submitFinishForm(gameId, formEl) {
   }
 
   const highlights = formEl.querySelector('.finish-highlights').value.trim();
+  const victoryType = formEl.querySelector('.finish-victory-type').value;
   const files = formEl.querySelector('.finish-photos').files;
 
   const { error: rErr } = await supabaseClient.from('results').insert(entries);
@@ -480,7 +487,7 @@ async function submitFinishForm(gameId, formEl) {
 
   const { error: gErr } = await supabaseClient
     .from('games')
-    .update({ status: 'completed', highlights: highlights || null })
+    .update({ status: 'completed', highlights: highlights || null, victory_type: victoryType || null })
     .eq('id', gameId);
 
   if (gErr) {
@@ -499,7 +506,7 @@ async function loadManageList() {
   const listEl = document.getElementById('manage-list');
   const { data: games, error } = await supabaseClient
     .from('games')
-    .select('id, played_on, name, description, info_text, highlights, note, ranked, poll_closed, badges_finalized, cover_image_url, results(player_name, rank, points), game_images(image_url), game_badges(badge_id, player_name, badges(name, icon, points))')
+    .select('id, played_on, name, description, info_text, highlights, note, victory_type, ranked, poll_closed, badges_finalized, cover_image_url, results(player_name, rank, points), game_images(image_url), game_badges(badge_id, player_name, badges(name, icon, points))')
     .eq('status', 'completed')
     .order('created_at', { ascending: false });
 
@@ -544,8 +551,17 @@ async function loadManageList() {
         <div class="badge-award-form" id="badge-award-form-${g.id}" style="display:none; margin-top:1rem;"></div>
         <div class="poll-results-panel" id="poll-results-${g.id}" style="display:none; margin-top:1rem;"></div>
         <div class="edit-gameinfo-form" id="edit-gameinfo-form-${g.id}" style="display:none; margin-top:1rem;">
-          <label>Oyun Bilgisi — oyunun kendi sayfasında, kapak fotoğrafının altında öne çıkan şekilde gösterilir</label>
+          <label>Öne Çıkan Not — oyunun kendi sayfasında, kapak fotoğrafının altında öne çıkan şekilde gösterilir</label>
           <textarea class="edit-gameinfo-textarea" placeholder="Bu oyunun kısa bir anlatısı ya da öne çıkan notu...">${escapeHtml(g.info_text || '')}</textarea>
+          <label>Açıklama (harita türü, hız, kural seti, notlar...)</label>
+          <textarea class="edit-gameinfo-description" placeholder="Harita türü, hız, kural seti, notlar...">${escapeHtml(g.description || '')}</textarea>
+          <label>Öne Çıkanlar &amp; Detaylı Tarihçe</label>
+          <textarea class="edit-gameinfo-highlights" placeholder="Ne oldu? Önemli anlar, ihanetler, geri dönüşler, nihai skorlar...">${escapeHtml(g.highlights || '')}</textarea>
+          <label>Zafer Tipi</label>
+          <select class="edit-gameinfo-victory-type">
+            <option value="">— Seç —</option>
+            ${VICTORY_TYPES.map(v => `<option value="${v}"${g.victory_type === v ? ' selected' : ''}>${v}</option>`).join('')}
+          </select>
           <button class="edit-gameinfo-save-btn" data-id="${g.id}">Kaydet</button>
           <div class="edit-gameinfo-msg"></div>
         </div>
@@ -581,8 +597,16 @@ async function loadManageList() {
       const formEl = document.getElementById(`edit-gameinfo-form-${gameId}`);
       const msgEl = formEl.querySelector('.edit-gameinfo-msg');
       const text = formEl.querySelector('.edit-gameinfo-textarea').value.trim();
+      const description = formEl.querySelector('.edit-gameinfo-description').value.trim();
+      const highlights = formEl.querySelector('.edit-gameinfo-highlights').value.trim();
+      const victoryType = formEl.querySelector('.edit-gameinfo-victory-type').value;
 
-      const { error: updErr } = await supabaseClient.from('games').update({ info_text: text || null }).eq('id', gameId);
+      const { error: updErr } = await supabaseClient.from('games').update({
+        info_text: text || null,
+        description: description || null,
+        highlights: highlights || null,
+        victory_type: victoryType || null
+      }).eq('id', gameId);
       if (updErr) {
         msgEl.textContent = 'Kaydedilemedi: ' + updErr.message;
         msgEl.className = 'error';
