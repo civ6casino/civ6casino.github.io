@@ -499,7 +499,7 @@ async function loadManageList() {
   const listEl = document.getElementById('manage-list');
   const { data: games, error } = await supabaseClient
     .from('games')
-    .select('id, played_on, name, description, info_text, highlights, note, ranked, poll_closed, cover_image_url, results(player_name, rank, points), game_images(image_url), game_badges(badge_id, player_name, badges(name, icon, points))')
+    .select('id, played_on, name, description, info_text, highlights, note, ranked, poll_closed, badges_finalized, cover_image_url, results(player_name, rank, points), game_images(image_url), game_badges(badge_id, player_name, badges(name, icon, points))')
     .eq('status', 'completed')
     .order('created_at', { ascending: false });
 
@@ -753,16 +753,24 @@ function toggleBadgeAwardForm(game) {
   } else {
     formEl.innerHTML = badgesCache.map(b => `
       <label>${escapeHtml(b.icon || '🏅')} ${escapeHtml(b.name)}${b.points ? ` (${b.points > 0 ? '+' : ''}${formatPoints(b.points)} puan)` : ''}</label>
-      <select class="badge-award-select" data-badge-id="${b.id}">
+      <select class="badge-award-select" data-badge-id="${b.id}"${game.badges_finalized ? ' disabled' : ''}>
         <option value="">— Kimse —</option>
         ${participants.map(p => `<option value="${escapeHtml(p)}"${existing[b.id] === p ? ' selected' : ''}>${escapeHtml(p)}</option>`).join('')}
       </select>
     `).join('') + `
-      <button class="save-badges-btn" data-id="${game.id}">Rozetleri Kaydet</button>
+      <button class="save-badges-btn" data-id="${game.id}"${game.badges_finalized ? ' disabled' : ''}>Rozetleri Kaydet</button>
       <div class="badge-award-msg"></div>
+      <hr style="margin:1rem 0; border-color:var(--border);">
+      <p class="muted">Rozetler kesinleştirildiğinde bu oyunun anket bloğu Oyun Detayı sayfasından tamamen kaldırılır.</p>
+      <button type="button" class="secondary toggle-badges-finalized-btn" data-id="${game.id}" data-finalized="${game.badges_finalized}">${game.badges_finalized ? 'Kesinleştirmeyi Geri Al' : 'Rozetleri Kesinleştir'}</button>
     `;
 
     formEl.querySelector('.save-badges-btn').addEventListener('click', () => saveBadgeAwards(game.id, formEl));
+    formEl.querySelector('.toggle-badges-finalized-btn').addEventListener('click', async () => {
+      const newFinalized = formEl.querySelector('.toggle-badges-finalized-btn').dataset.finalized !== 'true';
+      await supabaseClient.from('games').update({ badges_finalized: newFinalized }).eq('id', game.id);
+      loadManageList();
+    });
   }
 
   formEl.style.display = 'block';

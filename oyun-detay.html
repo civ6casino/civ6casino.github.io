@@ -168,7 +168,7 @@ async function loadGame() {
 
   const { data: g, error } = await supabaseClient
     .from('games')
-    .select('id, played_on, name, description, info_text, highlights, note, status, ranked, poll_closed, cover_image_url, results(player_name, rank, points), game_images(image_url), game_badges(player_name, badges(name, icon, points))')
+    .select('id, played_on, name, description, info_text, highlights, note, status, ranked, poll_closed, badges_finalized, cover_image_url, results(player_name, rank, points), game_images(image_url), game_badges(player_name, badges(name, icon, points))')
     .eq('id', gameId)
     .maybeSingle();
 
@@ -230,6 +230,11 @@ async function loadPoll() {
   const bodyEl = document.getElementById('poll-body');
   const g = currentGame;
   if (!g) return;
+
+  if (g.badges_finalized) {
+    panel.style.display = 'none';
+    return;
+  }
 
   const winner = (g.results || []).find(r => r.rank === 1);
   if (!winner || g.status !== 'completed') {
