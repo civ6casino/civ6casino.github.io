@@ -522,6 +522,34 @@ tr.rank-3 td:nth-child(2) { color: var(--bronze); font-weight: 700; }
   display: block;
 }
 
+.crest-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.crest-edit-btn {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 2px solid var(--bg);
+  background: var(--accent);
+  color: var(--bg);
+  font-size: 1.1rem;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.crest-edit-btn:hover {
+  background: #e2c377;
+  transform: scale(1.08);
+}
+
 .hero-banner h1 {
   font-size: clamp(2.2rem, 3.6vw, 3rem);
   color: var(--accent);
@@ -743,10 +771,6 @@ button.danger {
   background: var(--panel2);
   color: var(--muted);
   line-height: 1;
-}
-
-.profile-avatar-block {
-  margin-bottom: 1rem;
 }
 
 .theme-roster {
