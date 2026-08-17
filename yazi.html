@@ -221,7 +221,7 @@ function renderPost() {
   const displayName = p.is_anonymous ? 'Anonim Vakanüvis' : (p.author_name || 'Bilinmiyor');
   const authorLink = Civ6Auth.authorLinkHtml(p.is_anonymous ? null : p.author_name, postAuthorAvatarUrl, { label: p.is_anonymous ? 'Anonim Vakanüvis' : undefined });
   const date = new Date(p.created_at).toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' });
-  const gameTag = p.games ? ` · 🎮 <a href="oyun-detay.html?id=${p.game_id}">${escapeHtml(gameLabel(p.games))}</a>` : '';
+  const gameTag = p.games ? ` <a class="pill" href="oyun-detay.html?id=${p.game_id}">🎮 ${escapeHtml(gameLabel(p.games))}</a>` : '';
   document.getElementById('post-subtitle').innerHTML = `${authorLink} tarafından · ${date}${gameTag}`;
 
   const canEdit = Civ6Auth.currentUser && (p.author_id === Civ6Auth.currentUser.id || Civ6Auth.isAdmin);

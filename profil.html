@@ -225,7 +225,7 @@ async function loadBadges() {
           <strong>${escapeHtml(a.badges.icon || '🏅')} ${escapeHtml(a.badges.name)}</strong>
           ${a.badges.points ? `<span class="pill">${a.badges.points > 0 ? '+' : ''}${formatPoints(a.badges.points)} puan</span>` : ''}
         </div>
-        ${gameTitle ? `<a href="oyun-detay.html?id=${a.game_id}">${escapeHtml(gameTitle)}</a>` : ''}
+        ${gameTitle ? `<a class="pill" href="oyun-detay.html?id=${a.game_id}">🎮 ${escapeHtml(gameTitle)}</a>` : ''}
       </div>
       ${a.badges.description ? `<p class="muted" style="margin:0 0 0.6rem;">${escapeHtml(a.badges.description)}</p>` : ''}
     `;
@@ -252,11 +252,6 @@ async function loadStats() {
     return;
   }
 
-  const { count: badgeCount } = await supabaseClient
-    .from('game_badges')
-    .select('id', { count: 'exact', head: true })
-    .eq('player_name', playerName);
-
   const totalGames = (results || []).length;
 
   if (totalGames === 0) {
@@ -274,8 +269,6 @@ async function loadStats() {
     if (r.civilization) civCounts[r.civilization] = (civCounts[r.civilization] || 0) + 1;
   });
   const civEntries = Object.entries(civCounts).sort((a, b) => b[1] - a[1]);
-  const distinctCivs = civEntries.length;
-  const favoriteCiv = civEntries.length ? `${civEntries[0][0]} (${civEntries[0][1]}x)` : '—';
   const civList = civEntries.length ? civEntries.map(([c, n]) => `${c}${n > 1 ? ` ×${n}` : ''}`).join(', ') : 'Henüz kaydedilmedi';
 
   const rows = [
@@ -285,9 +278,6 @@ async function loadStats() {
     ['📈 Kazanma Oranı', `%${winRate.toFixed(0)}`],
     ['⭐ Toplam Puan', formatPoints(totalPoints)],
     ['📊 Ortalama Puan / Oyun', formatPoints(totalPoints / totalGames)],
-    ['🏅 Kazanılan Rozet', badgeCount || 0],
-    ['🌍 Farklı Medeniyet', distinctCivs],
-    ['❤️ En Sık Oynanan', favoriteCiv],
   ];
 
   el.innerHTML = `

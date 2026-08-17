@@ -511,7 +511,7 @@ async function loadManageList() {
   const listEl = document.getElementById('manage-list');
   const { data: games, error } = await supabaseClient
     .from('games')
-    .select('id, played_on, name, description, info_text, highlights, note, victory_type, ranked, poll_closed, badges_finalized, cover_image_url, results(player_name, rank, points, civilization), game_images(image_url), game_badges(badge_id, player_name, badges(name, icon, points))')
+    .select('id, played_on, name, description, info_text, highlights, note, victory_type, ranked, poll_closed, badges_finalized, cover_image_url, results(id, player_name, rank, points, civilization), game_images(image_url), game_badges(badge_id, player_name, badges(name, icon, points))')
     .eq('status', 'completed')
     .order('created_at', { ascending: false });
 
@@ -567,6 +567,15 @@ async function loadManageList() {
             <option value="">— Seç —</option>
             ${VICTORY_TYPES.map(v => `<option value="${v}"${g.victory_type === v ? ' selected' : ''}>${v}</option>`).join('')}
           </select>
+          ${sorted.length ? `
+            <label>Medeniyetler</label>
+            ${sorted.map(r => `
+              <div class="finish-rank-row" style="margin-bottom:0.4rem;">
+                <span class="muted" style="flex:1.2; align-self:center;">${RANK_LABELS[r.rank - 1] || `${r.rank}.`} ${escapeHtml(r.player_name)}</span>
+                <input type="text" class="edit-gameinfo-civ" data-result-id="${r.id}" placeholder="Medeniyet (örn. Kore)" value="${escapeHtml(r.civilization || '')}" style="flex:1;">
+              </div>
+            `).join('')}
+          ` : ''}
           <button class="edit-gameinfo-save-btn" data-id="${g.id}">Kaydet</button>
           <div class="edit-gameinfo-msg"></div>
         </div>
@@ -616,6 +625,20 @@ async function loadManageList() {
         msgEl.textContent = 'Kaydedilemedi: ' + updErr.message;
         msgEl.className = 'error';
         return;
+      }
+
+      const civInputs = formEl.querySelectorAll('.edit-gameinfo-civ');
+      for (const input of civInputs) {
+        const civ = input.value.trim();
+        const { error: civErr } = await supabaseClient
+          .from('results')
+          .update({ civilization: civ || null })
+          .eq('id', input.dataset.resultId);
+        if (civErr) {
+          msgEl.textContent = 'Medeniyetler kaydedilemedi: ' + civErr.message;
+          msgEl.className = 'error';
+          return;
+        }
       }
 
       loadManageList();
