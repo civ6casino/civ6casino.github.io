@@ -94,6 +94,32 @@
       <label for="game-ranked">Dereceli oyun (şeref listesine sayılsın)</label>
     </div>
 
+    <label>Medeniyetler (isteğe bağlı — biliniyorsa şimdiden gir, oyun bitirilirken değiştirilebilir)</label>
+    <div class="finish-rank-row" style="margin-bottom:0.4rem;">
+      <span class="muted" style="flex:1.2; align-self:center;">Yusuf</span>
+      <input type="text" class="start-civ" data-player="Yusuf" placeholder="Medeniyet (örn. Kore)" style="flex:1;">
+    </div>
+    <div class="finish-rank-row" style="margin-bottom:0.4rem;">
+      <span class="muted" style="flex:1.2; align-self:center;">Eren</span>
+      <input type="text" class="start-civ" data-player="Eren" placeholder="Medeniyet (örn. Kore)" style="flex:1;">
+    </div>
+    <div class="finish-rank-row" style="margin-bottom:0.4rem;">
+      <span class="muted" style="flex:1.2; align-self:center;">Arda</span>
+      <input type="text" class="start-civ" data-player="Arda" placeholder="Medeniyet (örn. Kore)" style="flex:1;">
+    </div>
+    <div class="finish-rank-row" style="margin-bottom:0.4rem;">
+      <span class="muted" style="flex:1.2; align-self:center;">Alperen</span>
+      <input type="text" class="start-civ" data-player="Alperen" placeholder="Medeniyet (örn. Kore)" style="flex:1;">
+    </div>
+    <div class="finish-rank-row" style="margin-bottom:0.4rem;">
+      <span class="muted" style="flex:1.2; align-self:center;">Taha</span>
+      <input type="text" class="start-civ" data-player="Taha" placeholder="Medeniyet (örn. Kore)" style="flex:1;">
+    </div>
+    <div class="finish-rank-row" style="margin-bottom:0.4rem;">
+      <span class="muted" style="flex:1.2; align-self:center;">Ayaz</span>
+      <input type="text" class="start-civ" data-player="Ayaz" placeholder="Medeniyet (örn. Kore)" style="flex:1;">
+    </div>
+
     <button id="start-game-btn">Oyunu Başlat</button>
     <div id="start-game-msg"></div>
   </section>
@@ -204,12 +230,19 @@ document.getElementById('start-game-btn').addEventListener('click', async () => 
     return;
   }
 
+  const startingCivs = {};
+  document.querySelectorAll('.start-civ').forEach(input => {
+    const val = input.value.trim();
+    if (val) startingCivs[input.dataset.player] = val;
+  });
+
   const { error } = await supabaseClient.from('games').insert({
     played_on: playedOn,
     name,
     description: description || null,
     status: 'in_progress',
-    ranked
+    ranked,
+    starting_civilizations: startingCivs
   });
 
   if (error) {
@@ -223,6 +256,7 @@ document.getElementById('start-game-btn').addEventListener('click', async () => 
   document.getElementById('game-name').value = '';
   document.getElementById('game-description').value = '';
   document.getElementById('game-ranked').checked = true;
+  document.querySelectorAll('.start-civ').forEach(input => { input.value = ''; });
   loadInProgressList();
 });
 
@@ -255,6 +289,7 @@ async function loadInProgressList() {
           <button data-id="${g.id}" class="secondary edit-desc-btn">⚙️ Açıklama</button>
           <button data-id="${g.id}" class="secondary edit-gameinfo-btn">📖 Oyun Bilgisi</button>
           <button data-id="${g.id}" class="secondary cover-photo-btn">🖼️ Kapak Fotoğrafı</button>
+          <button data-id="${g.id}" class="danger delete-inprogress-game">Sil</button>
         </div>
       </div>
       <h3 style="margin:0.3rem 0;">${escapeHtml(g.name)}</h3>
@@ -286,6 +321,15 @@ async function loadInProgressList() {
 
   document.querySelectorAll('.finish-game-btn').forEach(btn => {
     btn.addEventListener('click', () => openFinishForm(btn.dataset.id));
+  });
+
+  document.querySelectorAll('.delete-inprogress-game').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!confirm('Bu oyunu silmek istediğine emin misin? Bu, oyuna ait tüm içeriği (varsa sonuçlar, yazılar, yorumlar, fotoğraflar) KALICI olarak siler.')) return;
+      if (!confirm('Son kez soruyorum: gerçekten silmek istiyor musun? Bu işlem geri alınamaz.')) return;
+      await supabaseClient.from('games').delete().eq('id', btn.dataset.id);
+      loadInProgressList();
+    });
   });
 
   document.querySelectorAll('.edit-desc-btn').forEach(btn => {
@@ -399,12 +443,19 @@ async function loadInProgressList() {
   });
 }
 
-function openFinishForm(gameId) {
+async function openFinishForm(gameId) {
   const formEl = document.getElementById(`finish-form-${gameId}`);
   if (formEl.style.display === 'block') {
     formEl.style.display = 'none';
     return;
   }
+
+  const { data: gameRow } = await supabaseClient
+    .from('games')
+    .select('starting_civilizations')
+    .eq('id', gameId)
+    .maybeSingle();
+  const startingCivs = (gameRow && gameRow.starting_civilizations) || {};
 
   formEl.style.display = 'block';
   formEl.innerHTML = `
@@ -430,6 +481,15 @@ function openFinishForm(gameId) {
     <button class="finish-submit-btn" data-id="${gameId}">Kaydet &amp; Oyunu Tamamla</button>
     <div class="finish-msg"></div>
   `;
+
+  formEl.querySelectorAll('.finish-rank').forEach(sel => {
+    sel.addEventListener('change', () => {
+      const civInput = formEl.querySelector(`.finish-civ[data-rank="${sel.dataset.rank}"]`);
+      if (!civInput.value && startingCivs[sel.value]) {
+        civInput.value = startingCivs[sel.value];
+      }
+    });
+  });
 
   formEl.querySelector('.finish-submit-btn').addEventListener('click', () => submitFinishForm(gameId, formEl));
 }
@@ -711,7 +771,8 @@ async function loadManageList() {
 
   document.querySelectorAll('.delete-game').forEach(btn => {
     btn.addEventListener('click', async () => {
-      if (!confirm('Bu oyun silinsin mi?')) return;
+      if (!confirm('Bu oyunu silmek istediğine emin misin? Bu, oyunun sonuçlarını, rozetlerini, yazılarını, yorumlarını ve fotoğraflarını KALICI olarak siler.')) return;
+      if (!confirm('Son kez soruyorum: gerçekten silmek istiyor musun? Bu işlem geri alınamaz.')) return;
       await supabaseClient.from('games').delete().eq('id', btn.dataset.id);
       loadManageList();
     });
