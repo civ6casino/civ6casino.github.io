@@ -289,6 +289,7 @@ async function loadInProgressList() {
           <button data-id="${g.id}" class="secondary edit-desc-btn">⚙️ Açıklama</button>
           <button data-id="${g.id}" class="secondary edit-gameinfo-btn">📖 Oyun Bilgisi</button>
           <button data-id="${g.id}" class="secondary cover-photo-btn">🖼️ Kapak Fotoğrafı</button>
+          <button data-id="${g.id}" class="secondary post-compose-btn">✍️ Yazı Ekle</button>
           <button data-id="${g.id}" class="danger delete-inprogress-game">Sil</button>
         </div>
       </div>
@@ -316,11 +317,18 @@ async function loadInProgressList() {
         ${g.cover_image_url ? `<button type="button" class="secondary cover-photo-remove-btn" data-id="${g.id}">Kaldır</button>` : ''}
         <div class="cover-photo-msg"></div>
       </div>
+      <div class="post-compose-form" id="post-compose-form-${g.id}" style="display:none; margin-top:1rem;"></div>
     </div>
   `).join('');
 
   document.querySelectorAll('.finish-game-btn').forEach(btn => {
     btn.addEventListener('click', () => openFinishForm(btn.dataset.id));
+  });
+
+  document.querySelectorAll('.post-compose-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      togglePostComposeForm(btn.dataset.id);
+    });
   });
 
   document.querySelectorAll('.delete-inprogress-game').forEach(btn => {
