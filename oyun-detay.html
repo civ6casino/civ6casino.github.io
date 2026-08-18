@@ -217,7 +217,7 @@ async function loadGame() {
     ${sortedResults.length ? `<ol>${sortedResults.map(r => `<li>${escapeHtml(r.player_name)}${r.civilization ? ` (${escapeHtml(r.civilization)})` : ''} — ${r.points} puan</li>`).join('')}</ol>` : `
       <p class="muted">Henüz sonuç girilmedi.</p>
       ${g.starting_civilizations && Object.keys(g.starting_civilizations).length ? `
-        <p class="muted"><strong>Medeniyetler (henüz kesinleşmedi):</strong> ${Object.entries(g.starting_civilizations).map(([name, civ]) => `${escapeHtml(name)} (${escapeHtml(civ)})`).join(', ')}</p>
+        <p class="muted"><strong>Medeniyetler:</strong> ${Object.entries(g.starting_civilizations).map(([name, civ]) => `${escapeHtml(name)} (${escapeHtml(civ)})`).join(', ')}</p>
       ` : ''}
     `}
     ${awardedBadges.length ? `

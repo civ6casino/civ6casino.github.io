@@ -259,7 +259,18 @@ async function loadStats() {
     return;
   }
 
-  const totalPoints = results.reduce((sum, r) => sum + Number(r.points), 0);
+  // Rozet bonus puanları da (yalnızca dereceli/tamamlanmış oyunlarda) dahil edilir — Şeref Listesi ile aynı hesap.
+  const { data: badgeAwards } = await supabaseClient
+    .from('game_badges')
+    .select('badges!inner(points), games!inner(ranked, status)')
+    .eq('player_name', playerName)
+    .eq('games.ranked', true)
+    .eq('games.status', 'completed');
+
+  const badgePoints = (badgeAwards || []).reduce((sum, a) => sum + Number(a.badges.points || 0), 0);
+
+  const rankPoints = results.reduce((sum, r) => sum + Number(r.points), 0);
+  const totalPoints = rankPoints + badgePoints;
   const avgRank = results.reduce((sum, r) => sum + Number(r.rank), 0) / totalGames;
   const wins = results.filter(r => r.rank === 1).length;
   const winRate = (wins / totalGames) * 100;
