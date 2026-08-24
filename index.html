@@ -14,6 +14,7 @@
   </div>
   <nav>
     <a href="index.html" class="active">Şeref Listesi</a>
+    <a href="meydan.html">Meydan</a>
     <div class="nav-dropdown">
       <a href="oyun-tarihi.html">Oyun Tarihi</a>
       <div class="nav-dropdown-menu">
@@ -91,33 +92,6 @@
     </div>
   </section>
 
-  <section class="panel" id="meydan-panel">
-    <h2>🏟️ Meydan</h2>
-    <p class="muted">Kısa notlar, anlık düşünceler ve oyun içi anlar — en fazla 180 karakter.</p>
-
-    <div id="entry-compose" style="display:none;">
-      <div id="entry-game-tag-row" style="display:none;">
-        <label for="entry-game-select">Oyun Etiketi (isteğe bağlı)</label>
-        <select id="entry-game-select">
-          <option value="">— Yok —</option>
-        </select>
-      </div>
-      <label for="entry-body">Notun</label>
-      <textarea id="entry-body" maxlength="180" placeholder="Ne oluyor?"></textarea>
-      <div class="entry-compose-footer">
-        <span id="entry-char-count" class="muted">180 karakter kaldı</span>
-        <button id="entry-submit-btn">Paylaş</button>
-      </div>
-      <div id="entry-msg"></div>
-    </div>
-
-    <div id="entry-login-hint">
-      <p class="muted">Paylaşım yapmak için üst sol köşedeki <strong>Giriş Yap</strong> düğmesini kullan.</p>
-    </div>
-
-    <div id="entries-list" class="muted">Yükleniyor...</div>
-  </section>
-
   <section class="panel">
     <h2>📜 Oyun Tarihi</h2>
     <p class="muted">Tüm oyunları — dereceli ya da değil, devam eden ya da tamamlanmış — detaylarıyla görmek için Oyun Tarihi sayfasına göz at.</p>
@@ -131,143 +105,6 @@
 <script>
 const MEDALS = ['👑', '🥈', '🥉'];
 const ROSTER = ['Yusuf', 'Eren', 'Arda', 'Alperen', 'Taha', 'Ayaz'];
-
-const entryComposeEl = document.getElementById('entry-compose');
-const entryLoginHintEl = document.getElementById('entry-login-hint');
-const entryGameTagRow = document.getElementById('entry-game-tag-row');
-const entryGameSelect = document.getElementById('entry-game-select');
-const entryBodyInput = document.getElementById('entry-body');
-const entryCharCount = document.getElementById('entry-char-count');
-
-entryBodyInput.addEventListener('input', () => {
-  const remaining = 180 - entryBodyInput.value.length;
-  entryCharCount.textContent = `${remaining} karakter kaldı`;
-  entryCharCount.className = remaining < 0 ? 'error' : 'muted';
-});
-
-Civ6Auth.onChange(() => {
-  const loggedIn = !!(Civ6Auth.currentUser && Civ6Auth.currentUsername);
-  entryComposeEl.style.display = loggedIn ? 'block' : 'none';
-  entryLoginHintEl.style.display = loggedIn ? 'none' : 'block';
-  if (loggedIn) loadInProgressGamesForTag();
-  loadEntries();
-});
-
-async function loadInProgressGamesForTag() {
-  const { data: games } = await supabaseClient
-    .from('games')
-    .select('id, name, played_on')
-    .eq('status', 'in_progress')
-    .order('created_at', { ascending: false });
-
-  if (!games || games.length === 0) {
-    entryGameTagRow.style.display = 'none';
-    entryGameSelect.innerHTML = '<option value="">— Yok —</option>';
-    return;
-  }
-
-  entryGameTagRow.style.display = 'block';
-  entryGameSelect.innerHTML = '<option value="">— Yok —</option>' +
-    games.map(g => `<option value="${g.id}">${escapeHtml(g.name || g.played_on)}</option>`).join('');
-}
-
-document.getElementById('entry-submit-btn').addEventListener('click', async () => {
-  const msgEl = document.getElementById('entry-msg');
-  msgEl.textContent = '';
-  msgEl.className = '';
-
-  if (!Civ6Auth.currentUser || !Civ6Auth.currentUsername) {
-    msgEl.textContent = 'Paylaşım yapmak için giriş yapmalısın.';
-    msgEl.className = 'error';
-    return;
-  }
-
-  const body = entryBodyInput.value.trim();
-  if (!body) {
-    msgEl.textContent = 'Boş bir not paylaşamazsın.';
-    msgEl.className = 'error';
-    return;
-  }
-  if (body.length > 180) {
-    msgEl.textContent = 'En fazla 180 karakter olabilir.';
-    msgEl.className = 'error';
-    return;
-  }
-
-  if (!Civ6Auth.playerName) {
-    msgEl.textContent = 'Hesabın bir oyuncuya bağlı değil, yönetici ile iletişime geç.';
-    msgEl.className = 'error';
-    return;
-  }
-
-  const gameId = entryGameSelect.value || null;
-
-  const { error } = await supabaseClient.from('entries').insert({
-    author_id: Civ6Auth.currentUser.id,
-    author_name: Civ6Auth.playerName,
-    body,
-    game_id: gameId
-  });
-
-  if (error) {
-    msgEl.textContent = 'Paylaşılamadı: ' + error.message;
-    msgEl.className = 'error';
-    return;
-  }
-
-  entryBodyInput.value = '';
-  entryCharCount.textContent = '180 karakter kaldı';
-  entryCharCount.className = 'muted';
-  entryGameSelect.value = '';
-  msgEl.textContent = 'Paylaşıldı!';
-  msgEl.className = 'success';
-  loadEntries();
-});
-
-async function loadEntries() {
-  const listEl = document.getElementById('entries-list');
-  const { data: entries, error } = await supabaseClient
-    .from('entries')
-    .select('id, body, author_name, author_id, created_at, game_id, games(name, played_on)')
-    .order('created_at', { ascending: false })
-    .limit(50);
-
-  if (error) {
-    listEl.innerHTML = `<p class="error">Notlar yüklenemedi.</p>`;
-    console.error(error);
-    return;
-  }
-
-  if (!entries || entries.length === 0) {
-    listEl.innerHTML = `<p class="muted">Henüz not yok. İlk paylaşan sen ol!</p>`;
-    return;
-  }
-
-  const avatarMap = await Civ6Auth.fetchAvatars(entries.map(e => e.author_id));
-
-  listEl.innerHTML = entries.map(e => {
-    const date = new Date(e.created_at).toLocaleString('tr-TR', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
-    const canDelete = Civ6Auth.currentUser && (e.author_id === Civ6Auth.currentUser.id || Civ6Auth.isAdmin);
-    const gameTag = e.games ? `<span class="pill">🎮 ${escapeHtml(e.games.name || e.games.played_on)}</span>` : '';
-    return `
-      <div class="entry-card">
-        ${canDelete ? `<div class="card-actions"><button class="danger entry-delete-btn" data-id="${e.id}">Sil</button></div>` : ''}
-        <div class="entry-meta">${Civ6Auth.authorLinkHtml(e.author_name, avatarMap[e.author_id])} · ${date} ${gameTag}</div>
-        <div class="entry-body">${escapeHtml(e.body)}</div>
-      </div>
-    `;
-  }).join('');
-
-  document.querySelectorAll('.entry-delete-btn').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      if (!confirm('Bu not silinsin mi?')) return;
-      await supabaseClient.from('entries').delete().eq('id', btn.dataset.id);
-      loadEntries();
-    });
-  });
-}
-
-loadEntries();
 
 async function loadData() {
   const { data: games, error: gErr } = await supabaseClient
