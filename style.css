@@ -1163,11 +1163,6 @@ button.danger {
   font-weight: 600;
 }
 
-.fixed-info-sep {
-  color: var(--muted);
-  margin: 0 0.7rem;
-}
-
 /* Admin: Sabit Bilgiler inputs on the Oyun Bilgisi form */
 .fixed-info-admin-row {
   display: flex;

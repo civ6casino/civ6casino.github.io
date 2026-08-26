@@ -220,8 +220,8 @@ async function loadGame() {
   const hasAnyCiv = ROSTER.some(p => startingCivs[p]);
   const fixedInfoBox = (fixedInfoParts.length || hasAnyCiv) ? `
     <div class="fixed-info-box">
-      ${fixedInfoParts.length ? `<p class="fixed-info-line">${fixedInfoParts.join('<span class="fixed-info-sep">·</span>')}</p>` : ''}
-      ${hasAnyCiv ? `<p class="fixed-info-line"><strong>Medeniyetler:</strong> ${ROSTER.map(p => `${escapeHtml(p)}: ${startingCivs[p] ? escapeHtml(startingCivs[p]) : '—'}`).join('<span class="fixed-info-sep">·</span>')}</p>` : ''}
+      ${fixedInfoParts.length ? `<p class="fixed-info-line">${fixedInfoParts.join(' &nbsp;·&nbsp; ')}</p>` : ''}
+      ${hasAnyCiv ? `<p class="fixed-info-line"><strong>Medeniyetler:</strong> ${ROSTER.map(p => `${escapeHtml(p)}: ${startingCivs[p] ? escapeHtml(startingCivs[p]) : '—'}`).join(' &nbsp;·&nbsp; ')}</p>` : ''}
     </div>
   ` : '';
 
@@ -231,9 +231,6 @@ async function loadGame() {
     ${g.description ? `<p>${escapeHtml(g.description)}</p>` : ''}
     ${sortedResults.length ? `<ol>${sortedResults.map(r => `<li>${escapeHtml(r.player_name)}${r.civilization ? ` (${escapeHtml(r.civilization)})` : ''} — ${r.points} puan</li>`).join('')}</ol>` : `
       <p class="muted">Henüz sonuç girilmedi.</p>
-      ${g.starting_civilizations && Object.keys(g.starting_civilizations).length ? `
-        <p class="muted"><strong>Medeniyetler:</strong> ${Object.entries(g.starting_civilizations).map(([name, civ]) => `${escapeHtml(name)} (${escapeHtml(civ)})`).join(', ')}</p>
-      ` : ''}
     `}
     ${awardedBadges.length ? `
       <p class="muted">${awardedBadges.map(a => `${escapeHtml(a.badges.icon || '🏅')} <a href="profil.html?oyuncu=${encodeURIComponent(a.player_name)}">${escapeHtml(a.player_name)}</a>: ${escapeHtml(a.badges.name)}${a.badges.points ? ` (${a.badges.points > 0 ? '+' : ''}${formatPoints(a.badges.points)} puan)` : ''}`).join(' · ')}</p>
