@@ -322,17 +322,17 @@ async function loadInProgressList() {
     </div>
   `).join('');
 
-  document.querySelectorAll('.finish-game-btn').forEach(btn => {
+  listEl.querySelectorAll('.finish-game-btn').forEach(btn => {
     btn.addEventListener('click', () => openFinishForm(btn.dataset.id));
   });
 
-  document.querySelectorAll('.post-compose-btn').forEach(btn => {
+  listEl.querySelectorAll('.post-compose-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       togglePostComposeForm(btn.dataset.id);
     });
   });
 
-  document.querySelectorAll('.delete-inprogress-game').forEach(btn => {
+  listEl.querySelectorAll('.delete-inprogress-game').forEach(btn => {
     btn.addEventListener('click', async () => {
       if (!confirm('Bu oyunu silmek istediğine emin misin? Bu, oyuna ait tüm içeriği (varsa sonuçlar, yazılar, yorumlar, fotoğraflar) KALICI olarak siler.')) return;
       if (!confirm('Son kez soruyorum: gerçekten silmek istiyor musun? Bu işlem geri alınamaz.')) return;
@@ -341,14 +341,14 @@ async function loadInProgressList() {
     });
   });
 
-  document.querySelectorAll('.edit-desc-btn').forEach(btn => {
+  listEl.querySelectorAll('.edit-desc-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const formEl = document.getElementById(`edit-desc-form-${btn.dataset.id}`);
       formEl.style.display = formEl.style.display === 'block' ? 'none' : 'block';
     });
   });
 
-  document.querySelectorAll('.edit-desc-save-btn').forEach(btn => {
+  listEl.querySelectorAll('.edit-desc-save-btn').forEach(btn => {
     btn.addEventListener('click', async () => {
       const gameId = btn.dataset.id;
       const formEl = document.getElementById(`edit-desc-form-${gameId}`);
@@ -366,14 +366,14 @@ async function loadInProgressList() {
     });
   });
 
-  document.querySelectorAll('.edit-gameinfo-btn').forEach(btn => {
+  listEl.querySelectorAll('.edit-gameinfo-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const formEl = document.getElementById(`edit-gameinfo-form-${btn.dataset.id}`);
       formEl.style.display = formEl.style.display === 'block' ? 'none' : 'block';
     });
   });
 
-  document.querySelectorAll('.edit-gameinfo-save-btn').forEach(btn => {
+  listEl.querySelectorAll('.edit-gameinfo-save-btn').forEach(btn => {
     btn.addEventListener('click', async () => {
       const gameId = btn.dataset.id;
       const formEl = document.getElementById(`edit-gameinfo-form-${gameId}`);
@@ -391,14 +391,14 @@ async function loadInProgressList() {
     });
   });
 
-  document.querySelectorAll('.cover-photo-btn').forEach(btn => {
+  listEl.querySelectorAll('.cover-photo-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const formEl = document.getElementById(`cover-photo-form-${btn.dataset.id}`);
       formEl.style.display = formEl.style.display === 'block' ? 'none' : 'block';
     });
   });
 
-  document.querySelectorAll('.cover-photo-save-btn').forEach(btn => {
+  listEl.querySelectorAll('.cover-photo-save-btn').forEach(btn => {
     btn.addEventListener('click', async () => {
       const gameId = btn.dataset.id;
       const formEl = document.getElementById(`cover-photo-form-${gameId}`);
@@ -435,14 +435,14 @@ async function loadInProgressList() {
     });
   });
 
-  document.querySelectorAll('.cover-photo-remove-btn').forEach(btn => {
+  listEl.querySelectorAll('.cover-photo-remove-btn').forEach(btn => {
     btn.addEventListener('click', async () => {
       await supabaseClient.from('games').update({ cover_image_url: null }).eq('id', btn.dataset.id);
       loadInProgressList();
     });
   });
 
-  document.querySelectorAll('.toggle-ranked').forEach(btn => {
+  listEl.querySelectorAll('.toggle-ranked').forEach(btn => {
     btn.addEventListener('click', async () => {
       const newRanked = btn.dataset.ranked !== 'true';
       await supabaseClient.from('games').update({ ranked: newRanked }).eq('id', btn.dataset.id);
@@ -660,21 +660,21 @@ async function loadManageList() {
     `;
   }).join('');
 
-  document.querySelectorAll('.poll-results-btn').forEach(btn => {
+  listEl.querySelectorAll('.poll-results-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const game = games.find(x => x.id === btn.dataset.id);
       togglePollResults(game);
     });
   });
 
-  document.querySelectorAll('.edit-gameinfo-btn').forEach(btn => {
+  listEl.querySelectorAll('.edit-gameinfo-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const formEl = document.getElementById(`edit-gameinfo-form-${btn.dataset.id}`);
       formEl.style.display = formEl.style.display === 'block' ? 'none' : 'block';
     });
   });
 
-  document.querySelectorAll('.edit-gameinfo-save-btn').forEach(btn => {
+  listEl.querySelectorAll('.edit-gameinfo-save-btn').forEach(btn => {
     btn.addEventListener('click', async () => {
       const gameId = btn.dataset.id;
       const formEl = document.getElementById(`edit-gameinfo-form-${gameId}`);
@@ -714,27 +714,27 @@ async function loadManageList() {
     });
   });
 
-  document.querySelectorAll('.award-badges-btn').forEach(btn => {
+  listEl.querySelectorAll('.award-badges-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const game = games.find(x => x.id === btn.dataset.id);
       toggleBadgeAwardForm(game);
     });
   });
 
-  document.querySelectorAll('.cover-photo-btn').forEach(btn => {
+  listEl.querySelectorAll('.cover-photo-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const formEl = document.getElementById(`cover-photo-form-${btn.dataset.id}`);
       formEl.style.display = formEl.style.display === 'block' ? 'none' : 'block';
     });
   });
 
-  document.querySelectorAll('.post-compose-btn').forEach(btn => {
+  listEl.querySelectorAll('.post-compose-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       togglePostComposeForm(btn.dataset.id);
     });
   });
 
-  document.querySelectorAll('.cover-photo-save-btn').forEach(btn => {
+  listEl.querySelectorAll('.cover-photo-save-btn').forEach(btn => {
     btn.addEventListener('click', async () => {
       const gameId = btn.dataset.id;
       const formEl = document.getElementById(`cover-photo-form-${gameId}`);
@@ -771,14 +771,14 @@ async function loadManageList() {
     });
   });
 
-  document.querySelectorAll('.cover-photo-remove-btn').forEach(btn => {
+  listEl.querySelectorAll('.cover-photo-remove-btn').forEach(btn => {
     btn.addEventListener('click', async () => {
       await supabaseClient.from('games').update({ cover_image_url: null }).eq('id', btn.dataset.id);
       loadManageList();
     });
   });
 
-  document.querySelectorAll('.delete-game').forEach(btn => {
+  listEl.querySelectorAll('.delete-game').forEach(btn => {
     btn.addEventListener('click', async () => {
       if (!confirm('Bu oyunu silmek istediğine emin misin? Bu, oyunun sonuçlarını, rozetlerini, yazılarını, yorumlarını ve fotoğraflarını KALICI olarak siler.')) return;
       if (!confirm('Son kez soruyorum: gerçekten silmek istiyor musun? Bu işlem geri alınamaz.')) return;
@@ -787,7 +787,7 @@ async function loadManageList() {
     });
   });
 
-  document.querySelectorAll('.toggle-ranked').forEach(btn => {
+  listEl.querySelectorAll('.toggle-ranked').forEach(btn => {
     btn.addEventListener('click', async () => {
       const newRanked = btn.dataset.ranked !== 'true';
       await supabaseClient.from('games').update({ ranked: newRanked }).eq('id', btn.dataset.id);
