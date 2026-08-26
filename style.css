@@ -1139,6 +1139,70 @@ button.danger {
   color: var(--muted);
 }
 
+/* Fixed game info box (Harita / Oyun Hızı / Oyun No / Medeniyetler) */
+.fixed-info-box {
+  border: 1px solid var(--border);
+  background: var(--panel2);
+  border-radius: 8px;
+  padding: 0.7rem 1rem;
+  margin-bottom: 0.9rem;
+}
+
+.fixed-info-line {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.92rem;
+}
+
+.fixed-info-line + .fixed-info-line {
+  margin-top: 0.45rem;
+}
+
+.fixed-info-line strong {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.fixed-info-sep {
+  color: var(--muted);
+  margin: 0 0.7rem;
+}
+
+/* Admin: Sabit Bilgiler inputs on the Oyun Bilgisi form */
+.fixed-info-admin-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 0.6rem;
+}
+
+.fixed-info-admin-row input {
+  flex: 1;
+  min-width: 130px;
+}
+
+.fixed-civ-admin-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.9rem;
+  margin-bottom: 0.6rem;
+}
+
+.fixed-civ-admin-row .civ-field {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.fixed-civ-admin-row .civ-field span {
+  min-width: 56px;
+  font-size: 0.85rem;
+}
+
+.fixed-civ-admin-row .civ-field input {
+  width: 120px;
+}
+
 /* Score matrix table */
 .table-scroll {
   overflow-x: auto;

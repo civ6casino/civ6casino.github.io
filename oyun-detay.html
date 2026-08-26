@@ -169,7 +169,7 @@ async function loadGame() {
 
   const { data: g, error } = await supabaseClient
     .from('games')
-    .select('id, played_on, name, description, info_text, highlights, note, status, ranked, poll_closed, badges_finalized, victory_type, starting_civilizations, cover_image_url, results(player_name, rank, points, civilization), game_images(image_url), game_badges(player_name, badges(name, icon, points))')
+    .select('id, played_on, name, description, info_text, highlights, note, status, ranked, poll_closed, badges_finalized, victory_type, starting_civilizations, map_type, game_speed, game_number, cover_image_url, results(player_name, rank, points, civilization), game_images(image_url), game_badges(player_name, badges(name, icon, points))')
     .eq('id', gameId)
     .maybeSingle();
 
@@ -212,7 +212,21 @@ async function loadGame() {
     'Askeri Zafer': '⚔️'
   };
 
+  const fixedInfoParts = [];
+  if (g.map_type) fixedInfoParts.push(`<strong>Harita:</strong> ${escapeHtml(g.map_type)}`);
+  if (g.game_speed) fixedInfoParts.push(`<strong>Oyun Hızı:</strong> ${escapeHtml(g.game_speed)}`);
+  if (g.game_number) fixedInfoParts.push(`<strong>Oyun No:</strong> ${escapeHtml(g.game_number)}`);
+  const startingCivs = g.starting_civilizations || {};
+  const hasAnyCiv = ROSTER.some(p => startingCivs[p]);
+  const fixedInfoBox = (fixedInfoParts.length || hasAnyCiv) ? `
+    <div class="fixed-info-box">
+      ${fixedInfoParts.length ? `<p class="fixed-info-line">${fixedInfoParts.join('<span class="fixed-info-sep">·</span>')}</p>` : ''}
+      ${hasAnyCiv ? `<p class="fixed-info-line"><strong>Medeniyetler:</strong> ${ROSTER.map(p => `${escapeHtml(p)}: ${startingCivs[p] ? escapeHtml(startingCivs[p]) : '—'}`).join('<span class="fixed-info-sep">·</span>')}</p>` : ''}
+    </div>
+  ` : '';
+
   infoEl.innerHTML = `
+    ${fixedInfoBox}
     ${g.victory_type ? `<p><span class="pill">${VICTORY_ICONS[g.victory_type] || '🏆'} ${escapeHtml(g.victory_type)}</span></p>` : ''}
     ${g.description ? `<p>${escapeHtml(g.description)}</p>` : ''}
     ${sortedResults.length ? `<ol>${sortedResults.map(r => `<li>${escapeHtml(r.player_name)}${r.civilization ? ` (${escapeHtml(r.civilization)})` : ''} — ${r.points} puan</li>`).join('')}</ol>` : `

@@ -265,7 +265,7 @@ async function loadInProgressList() {
   const listEl = document.getElementById('in-progress-list');
   const { data: games, error } = await supabaseClient
     .from('games')
-    .select('id, played_on, name, description, info_text, ranked, cover_image_url')
+    .select('id, played_on, name, description, info_text, ranked, cover_image_url, map_type, game_speed, game_number, starting_civilizations')
     .eq('status', 'in_progress')
     .order('created_at', { ascending: false });
 
@@ -308,6 +308,21 @@ async function loadInProgressList() {
       <div class="edit-gameinfo-form" id="edit-gameinfo-form-${g.id}" style="display:none; margin-top:1rem;">
         <label>Oyun Bilgisi — oyunun kendi sayfasında, kapak fotoğrafının altında öne çıkan şekilde gösterilir</label>
         <textarea class="edit-gameinfo-textarea" placeholder="Bu oyunun kısa bir anlatısı ya da öne çıkan notu...">${escapeHtml(g.info_text || '')}</textarea>
+        <label>Sabit Bilgiler</label>
+        <div class="fixed-info-admin-row">
+          <input type="text" class="edit-gameinfo-map" placeholder="Harita (örn. Kıtalar)" value="${escapeHtml(g.map_type || '')}">
+          <input type="text" class="edit-gameinfo-speed" placeholder="Oyun Hızı (örn. Standart)" value="${escapeHtml(g.game_speed || '')}">
+          <input type="text" class="edit-gameinfo-number" placeholder="Oyun No (örn. 12)" value="${escapeHtml(g.game_number || '')}">
+        </div>
+        <label>Medeniyetler</label>
+        <div class="fixed-civ-admin-row">
+          ${ROSTER.map(p => `
+            <div class="civ-field">
+              <span class="muted">${p}:</span>
+              <input type="text" class="edit-gameinfo-startciv" data-player="${p}" placeholder="Medeniyet" value="${escapeHtml((g.starting_civilizations || {})[p] || '')}">
+            </div>
+          `).join('')}
+        </div>
         <button class="edit-gameinfo-save-btn" data-id="${g.id}">Kaydet</button>
         <div class="edit-gameinfo-msg"></div>
       </div>
@@ -379,8 +394,22 @@ async function loadInProgressList() {
       const formEl = document.getElementById(`edit-gameinfo-form-${gameId}`);
       const msgEl = formEl.querySelector('.edit-gameinfo-msg');
       const text = formEl.querySelector('.edit-gameinfo-textarea').value.trim();
+      const mapType = formEl.querySelector('.edit-gameinfo-map').value.trim();
+      const gameSpeed = formEl.querySelector('.edit-gameinfo-speed').value.trim();
+      const gameNumber = formEl.querySelector('.edit-gameinfo-number').value.trim();
+      const startingCivs = {};
+      formEl.querySelectorAll('.edit-gameinfo-startciv').forEach(input => {
+        const val = input.value.trim();
+        if (val) startingCivs[input.dataset.player] = val;
+      });
 
-      const { error: updErr } = await supabaseClient.from('games').update({ info_text: text || null }).eq('id', gameId);
+      const { error: updErr } = await supabaseClient.from('games').update({
+        info_text: text || null,
+        map_type: mapType || null,
+        game_speed: gameSpeed || null,
+        game_number: gameNumber || null,
+        starting_civilizations: startingCivs
+      }).eq('id', gameId);
       if (updErr) {
         msgEl.textContent = 'Kaydedilemedi: ' + updErr.message;
         msgEl.className = 'error';
@@ -580,7 +609,7 @@ async function loadManageList() {
   const listEl = document.getElementById('manage-list');
   const { data: games, error } = await supabaseClient
     .from('games')
-    .select('id, played_on, name, description, info_text, highlights, note, victory_type, ranked, poll_closed, badges_finalized, cover_image_url, results(id, player_name, rank, points, civilization), game_images(image_url), game_badges(badge_id, player_name, badges(name, icon, points))')
+    .select('id, played_on, name, description, info_text, highlights, note, victory_type, ranked, poll_closed, badges_finalized, cover_image_url, map_type, game_speed, game_number, starting_civilizations, results(id, player_name, rank, points, civilization), game_images(image_url), game_badges(badge_id, player_name, badges(name, icon, points))')
     .eq('status', 'completed')
     .order('created_at', { ascending: false });
 
@@ -637,7 +666,7 @@ async function loadManageList() {
             ${VICTORY_TYPES.map(v => `<option value="${v}"${g.victory_type === v ? ' selected' : ''}>${v}</option>`).join('')}
           </select>
           ${sorted.length ? `
-            <label>Medeniyetler</label>
+            <label>Sonuç Medeniyetleri (sıralamaya göre)</label>
             ${sorted.map(r => `
               <div class="finish-rank-row" style="margin-bottom:0.4rem;">
                 <span class="muted" style="flex:1.2; align-self:center;">${RANK_LABELS[r.rank - 1] || `${r.rank}.`} ${escapeHtml(r.player_name)}</span>
@@ -645,6 +674,21 @@ async function loadManageList() {
               </div>
             `).join('')}
           ` : ''}
+          <label>Sabit Bilgiler</label>
+          <div class="fixed-info-admin-row">
+            <input type="text" class="edit-gameinfo-map" placeholder="Harita (örn. Kıtalar)" value="${escapeHtml(g.map_type || '')}">
+            <input type="text" class="edit-gameinfo-speed" placeholder="Oyun Hızı (örn. Standart)" value="${escapeHtml(g.game_speed || '')}">
+            <input type="text" class="edit-gameinfo-number" placeholder="Oyun No (örn. 12)" value="${escapeHtml(g.game_number || '')}">
+          </div>
+          <label>Medeniyetler (Genel Bilgi kutusunda gösterilir)</label>
+          <div class="fixed-civ-admin-row">
+            ${ROSTER.map(p => `
+              <div class="civ-field">
+                <span class="muted">${p}:</span>
+                <input type="text" class="edit-gameinfo-startciv" data-player="${p}" placeholder="Medeniyet" value="${escapeHtml((g.starting_civilizations || {})[p] || '')}">
+              </div>
+            `).join('')}
+          </div>
           <button class="edit-gameinfo-save-btn" data-id="${g.id}">Kaydet</button>
           <div class="edit-gameinfo-msg"></div>
         </div>
@@ -683,12 +727,24 @@ async function loadManageList() {
       const description = formEl.querySelector('.edit-gameinfo-description').value.trim();
       const highlights = formEl.querySelector('.edit-gameinfo-highlights').value.trim();
       const victoryType = formEl.querySelector('.edit-gameinfo-victory-type').value;
+      const mapType = formEl.querySelector('.edit-gameinfo-map').value.trim();
+      const gameSpeed = formEl.querySelector('.edit-gameinfo-speed').value.trim();
+      const gameNumber = formEl.querySelector('.edit-gameinfo-number').value.trim();
+      const startingCivs = {};
+      formEl.querySelectorAll('.edit-gameinfo-startciv').forEach(input => {
+        const val = input.value.trim();
+        if (val) startingCivs[input.dataset.player] = val;
+      });
 
       const { error: updErr } = await supabaseClient.from('games').update({
         info_text: text || null,
         description: description || null,
         highlights: highlights || null,
-        victory_type: victoryType || null
+        victory_type: victoryType || null,
+        map_type: mapType || null,
+        game_speed: gameSpeed || null,
+        game_number: gameNumber || null,
+        starting_civilizations: startingCivs
       }).eq('id', gameId);
       if (updErr) {
         msgEl.textContent = 'Kaydedilemedi: ' + updErr.message;
