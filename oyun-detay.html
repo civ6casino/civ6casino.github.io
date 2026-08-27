@@ -216,12 +216,22 @@ async function loadGame() {
   if (g.map_type) fixedInfoParts.push(`<strong>Harita:</strong> ${escapeHtml(g.map_type)}`);
   if (g.game_speed) fixedInfoParts.push(`<strong>Oyun Hızı:</strong> ${escapeHtml(g.game_speed)}`);
   if (g.game_number) fixedInfoParts.push(`<strong>Oyun No:</strong> ${escapeHtml(g.game_number)}`);
-  const startingCivs = g.starting_civilizations || {};
-  const hasAnyCiv = ROSTER.some(p => startingCivs[p]);
+
+  // One civ per player per game: once results exist, they're the source of
+  // truth (and feed player stats elsewhere); before that, starting_civilizations
+  // (entered when the game was created/in progress) is all we have.
+  const civByPlayer = {};
+  if (sortedResults.length) {
+    sortedResults.forEach(r => { if (r.civilization) civByPlayer[r.player_name] = r.civilization; });
+  } else {
+    Object.assign(civByPlayer, g.starting_civilizations || {});
+  }
+  const hasAnyCiv = ROSTER.some(p => civByPlayer[p]);
+
   const fixedInfoBox = (fixedInfoParts.length || hasAnyCiv) ? `
     <div class="fixed-info-box">
       ${fixedInfoParts.length ? `<p class="fixed-info-line">${fixedInfoParts.join(' &nbsp;·&nbsp; ')}</p>` : ''}
-      ${hasAnyCiv ? `<p class="fixed-info-line"><strong>Medeniyetler:</strong> ${ROSTER.map(p => `${escapeHtml(p)}: ${startingCivs[p] ? escapeHtml(startingCivs[p]) : '—'}`).join(' &nbsp;·&nbsp; ')}</p>` : ''}
+      ${hasAnyCiv ? `<p class="fixed-info-line"><strong>Medeniyetler:</strong> ${ROSTER.map(p => `${escapeHtml(p)}: ${civByPlayer[p] ? escapeHtml(civByPlayer[p]) : '—'}`).join(' &nbsp;·&nbsp; ')}</p>` : ''}
     </div>
   ` : '';
 
@@ -229,7 +239,7 @@ async function loadGame() {
     ${fixedInfoBox}
     ${g.victory_type ? `<p><span class="pill">${VICTORY_ICONS[g.victory_type] || '🏆'} ${escapeHtml(g.victory_type)}</span></p>` : ''}
     ${g.description ? `<p>${escapeHtml(g.description)}</p>` : ''}
-    ${sortedResults.length ? `<ol>${sortedResults.map(r => `<li>${escapeHtml(r.player_name)}${r.civilization ? ` (${escapeHtml(r.civilization)})` : ''} — ${r.points} puan</li>`).join('')}</ol>` : `
+    ${sortedResults.length ? `<ol>${sortedResults.map(r => `<li>${escapeHtml(r.player_name)} — ${r.points} puan</li>`).join('')}</ol>` : `
       <p class="muted">Henüz sonuç girilmedi.</p>
     `}
     ${awardedBadges.length ? `

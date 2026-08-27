@@ -853,7 +853,7 @@ button.danger {
 
 .post-meta {
   color: var(--muted);
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   margin-bottom: 0.7rem;
   font-style: italic;
   font-family: "Forum", serif;
@@ -871,7 +871,7 @@ button.danger {
 .post-card-compact h3 {
   margin: 0 0 0.3rem;
   font-family: "Forum", serif;
-  font-size: 1.1rem;
+  font-size: 1.25rem;
 }
 
 .post-card-compact h3 a,
@@ -887,7 +887,7 @@ button.danger {
 
 .post-excerpt {
   color: var(--muted);
-  font-size: 0.92rem;
+  font-size: 1.02rem;
   line-height: 1.5;
   margin: 0.5rem 0 0;
   font-family: "Forum", serif;
@@ -991,7 +991,7 @@ button.danger {
 .lede {
   font-family: "Cormorant Garamond", serif;
   font-style: italic;
-  font-size: 1.35rem;
+  font-size: 1.5rem;
   line-height: 1.6;
   text-align: center;
   color: var(--text);
