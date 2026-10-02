@@ -65,8 +65,6 @@
 </div>
 
 <main>
-  <img id="cover-photo-display" class="cover-photo-box" style="display:none;" alt="">
-
   <section class="panel" id="gameinfo-panel" style="display:none;">
     <p id="gameinfo-lede" class="lede"></p>
   </section>
@@ -194,12 +192,6 @@ async function loadGame() {
   const rankedText = g.ranked ? 'Dereceli' : 'Derecesiz';
   document.getElementById('game-subtitle').textContent = `${g.played_on} · ${statusText} · ${rankedText}`;
 
-  if (g.cover_image_url) {
-    const coverEl = document.getElementById('cover-photo-display');
-    coverEl.src = g.cover_image_url;
-    coverEl.style.display = 'block';
-  }
-
   const sortedResults = (g.results || []).slice().sort((a, b) => a.rank - b.rank);
   const awardedBadges = (g.game_badges || []).filter(a => a.badges);
 
@@ -248,11 +240,16 @@ async function loadGame() {
     ${g.highlights ? `<p class="post-body">${escapeHtml(g.highlights)}</p>` : ''}
   `;
 
+  // Kapak Fotoğrafı (cover_image_url) her zaman büyük, tam genişlikte hero
+  // arka planı olarak gösterilir; ayarlanmamışsa, oyun bitirilirken eklenen
+  // ilk galeri fotoğrafına geri düşer. İki ayrı küçük/büyük görünüm olmasın
+  // diye tek görsel kaynağı kullanılıyor.
   const images = g.game_images || [];
-  if (images.length > 0) {
+  const heroImageUrl = g.cover_image_url || (images.length > 0 ? images[0].image_url : null);
+  if (heroImageUrl) {
     const heroEl = document.getElementById('hero-banner');
     heroEl.classList.add('hero-photo', 'game-photo-hero');
-    heroEl.style.backgroundImage = `url('${images[0].image_url}')`;
+    heroEl.style.backgroundImage = `url('${heroImageUrl}')`;
     heroEl.insertAdjacentHTML('afterend', '<div class="hero-fade-mask" aria-hidden="true"></div>');
   }
 
